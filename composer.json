@@ -1,0 +1,30 @@
+{
+    "name": "cravler/faye-app-bundle",
+    "type": "symfony-bundle",
+    "keywords": [
+        "WebSockets",
+        "Sockets",
+        "Symfony",
+        "PubSub",
+        "Bayeux",
+        "Node.js",
+        "Faye"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Sergei Vizel",
+            "email": "sergei.vizel@gmail.com",
+            "homepage": "http://github.com/cravler"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "symfony/framework-bundle": "~2.3",
+        "nc/faye-client": "~1.0"
+    },
+    "autoload": {
+        "psr-0": { "Cravler\\FayeAppBundle": "" }
+    },
+    "target-dir": "Cravler/FayeAppBundle"
+}

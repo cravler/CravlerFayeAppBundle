@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Faye-app: Example</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://rawgit.com/carhartl/jquery-cookie/master/src/jquery.cookie.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+    {{ faye_app_javascript() }}
+
+    {% set defaultPath = path(app.request.attributes.get('_route')) %}
+    {% set currentPath = path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) %}
+
+    <script type="text/javascript">
+        $(function() {
+
+            var stringify = function(data) {
+                if (typeof data !== 'string') {
+                    try {
+                        data = JSON.stringify(data, undefined, 2);
+                    } catch (e) {}
+                }
+
+                return data;
+            };
+
+            var print = function(msg, dataText) {
+                $('#debug_data').append([
+                    '<div>',
+                        msg,
+                        (
+                            dataText ? '<pre>' + stringify(dataText) + '</pre>' : ''
+                        ),
+                    '</div>'
+                ].join(''));
+            };
+
+            var Logger = {
+                incoming: function(message, callback) {
+                    print('incoming', message);
+                    callback(message);
+                },
+                outgoing: function(message, callback) {
+                    print('outgoing', message);
+                    callback(message);
+                }
+            };
+        {% if system %}
+
+            FayeApp.addExtension({
+                outgoing: function(message, callback) {
+                    if (message.channel === '/meta/subscribe' || !message.channel.match(/^\/meta\//)) {
+                        if (!message.ext) {
+                            message.ext = {};
+                        }
+                        message.ext.security = {{ security|json_encode(constant('JSON_FORCE_OBJECT'))|raw }};
+                    }
+                    callback(message);
+                }
+            });
+        {% endif %}
+
+            if ($.cookie('faye-app-example-debug')) {
+                FayeApp.addExtension(Logger);
+                $('#debug').prop('checked', true);
+            }
+
+            FayeApp.on('transport:up', function() {
+                print('the client is online');
+            });
+
+            FayeApp.on('transport:down', function() {
+                print('the client is offline');
+            });
+
+            var exampleEntryPoint = FayeApp.createEntryPoint('faye-app.example');
+
+            var subscribeChannel = function(name) {
+                var subscription = exampleEntryPoint.subscribe('/' + name, function(message) {
+                    print('[' + name + '] Handle message:', message);
+                });
+
+                subscription.then(function() {
+                    print('[' + name + '] Subscription is now active!');
+                }, function(error) {
+                    print('[' + name + '] Subscription problem: ' + error.message);
+                });
+            };
+
+            var sayHi = function(name) {
+                var message = {};
+                message[name] = 'Hi there';
+
+                var publication = exampleEntryPoint.publish('/' + name, message);
+
+                publication.then(function() {
+                    print('[' + name + '] Message received by server!');
+                }, function(error) {
+                    print('[' + name + '] There was a problem: ' + error.message);
+                });
+            };
+
+            subscribeChannel('foo');
+            subscribeChannel('bar');
+            subscribeChannel('baz');
+
+            $('#clear_console').click(function(event) {
+                event.preventDefault();
+                $('#debug_data').empty();
+            });
+
+            $('#foo_say_hi').click(function(event) {
+                event.preventDefault();
+                sayHi('foo');
+            });
+
+            $('#bar_say_hi').click(function(event) {
+                event.preventDefault();
+                sayHi('bar');
+            });
+
+            $('#baz_say_hi').click(function(event) {
+                event.preventDefault();
+                sayHi('baz');
+            });
+
+            $('#debug').click(function(event) {
+                if ($(this).prop('checked')) {
+                    FayeApp.addExtension(Logger);
+                    $.cookie('faye-app-example-debug', 1, { path: '/' });
+                } else {
+                    FayeApp.removeExtension(Logger);
+                    $.removeCookie('faye-app-example-debug', { path: '/' });
+                }
+            });
+
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="row-fluid">
+            <h1>Example</h1>
+        {% if currentPath|replace({ (defaultPath): '' }) == '/system' %}
+
+            [ <a href="{{ path('faye_app_example') }}">Default</a> ]
+            [ <b>System</b> ]
+        {% else %}
+
+            [ <b>Default</b> ]
+            [ <a href="{{ path('faye_app_example', { 'type': 'system' }) }}">System</a> ]
+        {% endif %}
+
+            <div class="page-header">
+                <form>
+                    <button id="clear_console" class="btn btn-danger">Clear</button>
+                    <button id="foo_say_hi" class="btn btn-primary">[foo] Say Hi</button>
+                    <button id="bar_say_hi" class="btn btn-primary">[bar] Say Hi</button>
+                    <button id="baz_say_hi" class="btn btn-primary">[baz] Say Hi</button>
+                    <label class="checkbox" style="margin:20px 20px 0;">
+                        <input id="debug" type="checkbox"> Debug
+                    </label>
+                </form>
+            </div>
+
+            <div id="debug_data"></div>
+        </div>
+    </div>
+</body>
+</html>
