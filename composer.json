@@ -26,5 +26,13 @@
     "autoload": {
         "psr-0": { "Cravler\\FayeAppBundle": "" }
     },
-    "target-dir": "Cravler/FayeAppBundle"
+    "target-dir": "Cravler/FayeAppBundle",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        },
+        "modera-module": {
+            "register-bundle": "Cravler\\FayeAppBundle\\CravlerFayeAppBundle"
+        }
+    }
 }

@@ -8,6 +8,7 @@
         <parameter key="cravler_faye_app.service.security_manager.class">Cravler\FayeAppBundle\Service\SecurityManager</parameter>
         <parameter key="cravler_faye_app.service.entry_points_chain.class">Cravler\FayeAppBundle\Service\EntryPointsChain</parameter>
         <parameter key="cravler_faye_app.service.entry_point_manager.class">Cravler\FayeAppBundle\Service\EntryPointManager</parameter>
+        <parameter key="cravler_faye_app.contribution.routing_resources_provider.class">Cravler\FayeAppBundle\Contribution\RoutingResourcesProvider</parameter>
     </parameters>
 
     <services>
@@ -26,6 +27,12 @@
                  class="%cravler_faye_app.service.entry_point_manager.class%">
             <argument type="service" id="cravler_faye_app.service.security_manager" />
             <argument>%cravler_faye_app.config.app%</argument>
+        </service>
+
+        <service id="cravler_faye_app.contribution.routing_resources_provider"
+                 class="%cravler_faye_app.contribution.routing_resources_provider.class%">
+
+            <tag name="modera_routing.routing_resources_provider" />
         </service>
 
     </services>
