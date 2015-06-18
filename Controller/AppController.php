@@ -90,10 +90,15 @@ class AppController extends Controller
             }
         }
 
-        $ext = isset($data['ext']) ? $data['ext'] : array();
-        if (isset($ext['security']) && $sm->isSystem($ext['security'])) {
+        $message = array(
+            'ext'      => isset($data['ext']) ? $data['ext'] : array(),
+            'data'     => isset($data['data']) ? $data['data'] : array(),
+            'clientId' => isset($data['clientId']) ? $data['clientId'] : null,
+        );
+
+        if (isset($message['ext']['security']) && $sm->isSystem($message['ext']['security'])) {
             $response['success'] = true;
-        } else if ($entryPoint && $entryPoint->isGranted($type, $channel, $ext)) {
+        } else if ($entryPoint && $entryPoint->isGranted($type, $channel, $message)) {
             $response['success'] = true;
         }
 

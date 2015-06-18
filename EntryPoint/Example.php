@@ -18,15 +18,15 @@ class Example extends AbstractEntryPoint
     /**
      * @param string $type
      * @param string $channel
-     * @param array $ext
+     * @param array $message
      * @return bool
      */
-    public function isGranted($type, $channel, array $ext)
+    public function isGranted($type, $channel, array $message)
     {
         $user = null;
-        if (isset($ext['security'])) {
+        if (isset($message['ext']['security'])) {
             $sm = $this->getEntryPointManager()->getSecurityManager();
-            $user = $sm->getUser($ext['security']);
+            $user = $sm->getUser($message['ext']['security']);
         }
 
         // check user permissions, if needed

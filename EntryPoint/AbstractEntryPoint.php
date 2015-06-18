@@ -42,10 +42,10 @@ abstract class AbstractEntryPoint implements EntryPointInterface
     /**
      * @param string $type
      * @param string $channel
-     * @param array $ext
+     * @param array $message
      * @return bool
      */
-    public function isGranted($type, $channel, array $ext)
+    public function isGranted($type, $channel, array $message)
     {
         if (self::TYPE_SUBSCRIBE == $type) {
             return true;
