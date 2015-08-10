@@ -74,13 +74,16 @@ class AppController extends Controller
         $entryPoint = null;
 
         $data = $request->request->all();
-        if ($data['channel'] === '/meta/subscribe') {
-            $type = EntryPointInterface::TYPE_SUBSCRIBE;
-            $channel = $data['subscription'];
-        } else {
-            $type = EntryPointInterface::TYPE_PUBLISH;
-            $channel = $data['channel'];
+        if (isset($data['channel'])) {
+            if ($data['channel'] === '/meta/subscribe') {
+                $type = EntryPointInterface::TYPE_SUBSCRIBE;
+                $channel = $data['subscription'];
+            } else {
+                $type = EntryPointInterface::TYPE_PUBLISH;
+                $channel = $data['channel'];
+            }
         }
+
 
         if ($channel) {
             $key = explode('/', $channel, 3);
