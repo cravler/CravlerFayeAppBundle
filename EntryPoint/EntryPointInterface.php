@@ -19,15 +19,15 @@ interface EntryPointInterface
 
     /**
      * @param string $channel
-     * @param array $data
+     * @param mixed $data
      */
     public function publish($channel, $data = null);
 
     /**
      * @param string $type
      * @param string $channel
-     * @param array $ext
+     * @param array $message
      * @return bool
      */
-    public function isGranted($type, $channel, array $ext);
+    public function isGranted($type, $channel, array $message);
 }
