@@ -5,6 +5,9 @@
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
+        <parameter key="cravler_faye_app.client.client.class">Cravler\FayeAppBundle\Client\Client</parameter>
+        <parameter key="cravler_faye_app.client.adapter.curl_adapter.class">Cravler\FayeAppBundle\Client\Adapter\CurlAdapter</parameter>
+        <parameter key="cravler_faye_app.client.adapter.terminate_adapter.class">Cravler\FayeAppBundle\Client\Adapter\TerminateAdapter</parameter>
         <parameter key="cravler_faye_app.service.security_manager.class">Cravler\FayeAppBundle\Service\SecurityManager</parameter>
         <parameter key="cravler_faye_app.service.entry_points_chain.class">Cravler\FayeAppBundle\Service\EntryPointsChain</parameter>
         <parameter key="cravler_faye_app.service.entry_point_manager.class">Cravler\FayeAppBundle\Service\EntryPointManager</parameter>
@@ -12,6 +15,27 @@
     </parameters>
 
     <services>
+
+        <service id="cravler_faye_app.client" alias="cravler_faye_app.client.client" />
+        <service id="cravler_faye_app.client.adapter" alias="cravler_faye_app.client.adapter.terminate_adapter" />
+
+        <service id="cravler_faye_app.client.adapter.curl_adapter"
+                 class="%cravler_faye_app.client.adapter.curl_adapter.class%">
+        </service>
+
+        <service id="cravler_faye_app.client.adapter.terminate_adapter"
+                 class="%cravler_faye_app.client.adapter.terminate_adapter.class%">
+            <argument type="service" id="cravler_faye_app.client.adapter.curl_adapter" />
+
+            <tag name="kernel.event_listener" event="kernel.terminate" method="onTerminate" />
+            <tag name="kernel.event_listener" event="console.terminate" method="onTerminate" />
+        </service>
+
+        <service id="cravler_faye_app.client.client"
+                 class="%cravler_faye_app.client.client.class%">
+            <argument type="service" id="cravler_faye_app.client.adapter" />
+            <argument>%cravler_faye_app.config.app%</argument>
+        </service>
 
         <service id="cravler_faye_app.service.security_manager"
                  class="%cravler_faye_app.service.security_manager.class%">
@@ -26,7 +50,7 @@
         <service id="cravler_faye_app.service.entry_point_manager"
                  class="%cravler_faye_app.service.entry_point_manager.class%">
             <argument type="service" id="cravler_faye_app.service.security_manager" />
-            <argument>%cravler_faye_app.config.app%</argument>
+            <argument type="service" id="cravler_faye_app.client" />
         </service>
 
         <service id="cravler_faye_app.contribution.routing_resources_provider"

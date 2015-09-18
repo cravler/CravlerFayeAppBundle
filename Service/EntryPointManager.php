@@ -4,6 +4,7 @@ namespace Cravler\FayeAppBundle\Service;
 
 use Nc\FayeClient\Client;
 use Nc\FayeClient\Adapter\CurlAdapter;
+use Cravler\FayeAppBundle\Client\ClientInterface;
 use Cravler\FayeAppBundle\EntryPoint\EntryPointInterface;
 
 /**
@@ -23,16 +24,12 @@ class EntryPointManager
 
     /**
      * @param SecurityManager $sm
-     * @param array $config
+     * @param ClientInterface $client
      */
-    public function __construct(SecurityManager $sm, array $config)
+    public function __construct(SecurityManager $sm, ClientInterface $client)
     {
         $this->sm = $sm;
-
-        $this->client = new Client(
-            new CurlAdapter(),
-            $config['scheme'] . '://' . $config['host'] . ':' . $config['port'] . $config['mount']
-        );
+        $this->client = $client;
     }
 
     /**
