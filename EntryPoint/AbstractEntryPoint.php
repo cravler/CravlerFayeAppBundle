@@ -53,4 +53,15 @@ abstract class AbstractEntryPoint implements EntryPointInterface
             return false;
         }
     }
+
+    /**
+     * @param string $type
+     * @param string $channel
+     * @param array $message
+     * @return bool|int
+     */
+    public function useCache($type, $channel, array $message)
+    {
+        return false;
+    }
 }

@@ -23,6 +23,8 @@ class AppController extends Controller
 {
     /**
      * @Route("/init.js", name="faye_app_init")
+     * @param Request $request
+     * @return Response
      */
     public function initAction(Request $request)
     {
@@ -56,6 +58,8 @@ class AppController extends Controller
 
     /**
      * @Route("/security", name="faye_app_security")
+     * @param Request $request
+     * @return JsonResponse
      */
     public function securityAction(Request $request)
     {
@@ -66,7 +70,8 @@ class AppController extends Controller
         $sm = $this->container->get('cravler_faye_app.service.security_manager');
 
         $response = array(
-            'success' => false
+            'success' => false,
+            'cache'   => false,
         );
 
         $type = null;
@@ -103,6 +108,7 @@ class AppController extends Controller
             $response['success'] = true;
         } else if ($entryPoint && $entryPoint->isGranted($type, $channel, $message)) {
             $response['success'] = true;
+            $response['cache'] = $entryPoint->useCache($type, $channel, $message);
         }
 
         if ($response['success'] === false && !isset($response['msg'])) {

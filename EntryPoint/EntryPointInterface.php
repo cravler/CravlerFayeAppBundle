@@ -30,4 +30,12 @@ interface EntryPointInterface
      * @return bool
      */
     public function isGranted($type, $channel, array $message);
+
+    /**
+     * @param string $type
+     * @param string $channel
+     * @param array $message
+     * @return bool|int
+     */
+    public function useCache($type, $channel, array $message);
 }
