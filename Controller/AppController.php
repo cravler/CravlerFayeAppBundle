@@ -119,6 +119,36 @@ class AppController extends Controller
     }
 
     /**
+     * @Route("/status", name="faye_app_status")
+     * @param Request $request
+     * @return Response
+     */
+    public function statusAction(Request $request)
+    {
+        $config = $this->container->getParameter(CravlerFayeAppExtension::CONFIG_KEY);
+
+        $appCfg = $config['app'];
+        $url = $appCfg['scheme'] . '://' . $appCfg['host'] . ':' . $appCfg['port'] . $appCfg['mount'];
+
+        $status = 503;
+        $content = 'Service Unavailable';
+        try {
+            $fp = fsockopen($appCfg['host'], $appCfg['port'], $errCode, $errStr, 1);
+            if ($fp) {
+                $headers = get_headers($url);
+                $code = intval(substr($headers[0], 9, 3));
+                if(400 == $code) {
+                    $status = 200;
+                    $content = 'OK';
+                }
+            }
+            fclose($fp);
+        } catch (\Exception $e) {}
+
+        return new Response($content, $status);
+    }
+
+    /**
      * @Route("/example/{type}", defaults={"type"=null}, name="faye_app_example")
      * @Template()
      */

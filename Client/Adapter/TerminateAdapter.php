@@ -33,10 +33,10 @@ class TerminateAdapter implements AdapterInterface
      */
     public function postJSON($url, $body)
     {
-        $this->data[] = array(
-            'url'  => $url,
-            'body' => $body,
-        );
+        if (!isset($this->data[$url])) {
+            $this->data[$url] = array();
+        }
+        $this->data[$url][] = $body;
     }
 
     /**
@@ -48,8 +48,14 @@ class TerminateAdapter implements AdapterInterface
             return;
         }
 
-        foreach ($this->data as $message) {
-            $this->adapter->postJSON($message['url'], $message['body']);
+        foreach ($this->data as $url => $data) {
+            if ($this->adapter instanceof CurlAdapter) {
+                $this->adapter->postJSON($url, $data);
+            } else {
+                foreach ($data as $body) {
+                    $this->adapter->postJSON($url, $body);
+                }
+            }
         }
         $this->data = array();
     }
