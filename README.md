@@ -132,9 +132,9 @@ cravler_faye_app:
     use_request_uri: false
     secret: ThisTokenIsNotSoSecretChangeIt
     app:
-        scheme: http
+        scheme: ~
         host: 127.0.0.1
-        port: 8000
+        port: ~
         mount: /pub-sub
         options: {}
 ```

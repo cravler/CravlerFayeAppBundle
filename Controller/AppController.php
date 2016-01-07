@@ -128,12 +128,19 @@ class AppController extends Controller
         $config = $this->container->getParameter(CravlerFayeAppExtension::CONFIG_KEY);
 
         $appCfg = $config['app'];
-        $url = $appCfg['scheme'] . '://' . $appCfg['host'] . ':' . $appCfg['port'] . $appCfg['mount'];
+        $scheme = $appCfg['scheme'] ?: $request->getScheme();
+        $url = $scheme . '://' . $appCfg['host'];
+        $port = 'https' == $scheme ? 443 : 80;
+        if ($appCfg['port']) {
+            $url = $url . ':' . $appCfg['port'];
+            $port = $appCfg['port'];
+        }
+        $url = $url . $appCfg['mount'];
 
         $status = 503;
         $content = 'Service Unavailable';
         try {
-            $fp = fsockopen($appCfg['host'], $appCfg['port'], $errCode, $errStr, 1);
+            $fp = fsockopen($appCfg['host'], $port, $errCode, $errStr, 1);
             if ($fp) {
                 $headers = get_headers($url);
                 $code = intval(substr($headers[0], 9, 3));

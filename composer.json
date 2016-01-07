@@ -20,7 +20,7 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "symfony/framework-bundle": "~2.3",
+        "symfony/framework-bundle": "~2.3|~3.0",
         "nc/faye-client": "~1.0"
     },
     "autoload": {
@@ -29,7 +29,7 @@
     "target-dir": "Cravler/FayeAppBundle",
     "extra": {
         "branch-alias": {
-            "dev-master": "1.0-dev"
+            "dev-master": "1.x-dev"
         },
         "modera-module": {
             "register-bundle": "Cravler\\FayeAppBundle\\CravlerFayeAppBundle"

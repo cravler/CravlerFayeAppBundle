@@ -62,13 +62,19 @@ class FayeAppExtension extends \Twig_Extension
      */
     static function generateUri(Request $request, array $config)
     {
+        $scheme = $config['app']['scheme'] ?: $request->getScheme();
+
         if ($config['use_request_uri']) {
-            $url = $request->getScheme() . '://' . $request->getHost();
+            $url = $scheme . '://' . $request->getHost();
         } else {
-            $url = $config['app']['scheme'] . '://' . $config['app']['host'];
+            $url = $scheme . '://' . $config['app']['host'];
         }
 
-        return $url . ':' . $config['app']['port'] . $config['app']['mount'];
+        if ($config['app']['port']) {
+            $url = $url . ':' . $config['app']['port'];
+        }
+
+        return $url . $config['app']['mount'];
     }
 
     /**

@@ -21,10 +21,13 @@ class Client implements ClientInterface
      */
     public function __construct(AdapterInterface $adapter, array $config)
     {
-        $this->client = new FayeClient(
-            $adapter,
-            $config['scheme'] . '://' . $config['host'] . ':' . $config['port'] . $config['mount']
-        );
+        $url = ($config['scheme'] ?: 'http') . '://' . $config['host'];
+        if ($config['port']) {
+            $url = $url . ':' . $config['port'];
+        }
+        $url = $url . $config['mount'];
+
+        $this->client = new FayeClient($adapter, $url);
     }
 
     /**
