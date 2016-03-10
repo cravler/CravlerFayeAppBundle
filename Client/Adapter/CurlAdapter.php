@@ -19,6 +19,8 @@ class CurlAdapter implements AdapterInterface
         if (function_exists('exec')) {
             $cmd = "";
             foreach ($data as $key => $body) {
+                $body = str_replace('\'', '\u0027', $body);
+
                 if ($key) {
                     $cmd .= " ; ";
                 }
