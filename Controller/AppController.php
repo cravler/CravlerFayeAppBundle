@@ -48,10 +48,10 @@ class AppController extends Controller
         }
 
         $content = 'FayeApp.connect(' . json_encode(array(
-                'url'      => FayeAppExtension::generateUri($request, $config),
-                'security' => $security,
-                'options'  => $config['app']['options'],
-            ), JSON_PRETTY_PRINT|JSON_FORCE_OBJECT) . ');';
+            'url'      => FayeAppExtension::generateUri($request, $config),
+            'security' => $security,
+            'options'  => $config['app']['options'],
+        ), JSON_PRETTY_PRINT|JSON_FORCE_OBJECT) . ');';
 
         return new Response($content, 200, array('Content-Type' => $request->getMimeType('js')));
     }
