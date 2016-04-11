@@ -71,11 +71,24 @@ var FayeApp = (function() {
      * @param callback
      * @returns {FayeApp}
      */
-    FayeApp.prototype.on = function(event, callback) {
+    FayeApp.prototype.addListener = function(event, callback) {
         if (!this.client) { throwError(); }
-        this.client.on.apply(this.client, arguments);
+        this.client.addListener.apply(this.client, arguments);
         return this;
     };
+    FayeApp.prototype.on = FayeApp.prototype.addListener;
+
+    /**
+     * @param event
+     * @param callback
+     * @returns {FayeApp}
+     */
+    FayeApp.prototype.removeListener = function(event, callback) {
+        if (!this.client) { throwError(); }
+        this.client.removeListener.apply(this.client, arguments);
+        return this;
+    };
+    FayeApp.prototype.un = FayeApp.prototype.removeListener;
 
     /**
      * @param extension
