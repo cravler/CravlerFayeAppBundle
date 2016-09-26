@@ -10,6 +10,7 @@
         <parameter key="cravler_faye_app.client.adapter.terminate_adapter.class">Cravler\FayeAppBundle\Client\Adapter\TerminateAdapter</parameter>
         <parameter key="cravler_faye_app.service.security_manager.class">Cravler\FayeAppBundle\Service\SecurityManager</parameter>
         <parameter key="cravler_faye_app.service.entry_points_chain.class">Cravler\FayeAppBundle\Service\EntryPointsChain</parameter>
+        <parameter key="cravler_faye_app.service.extensions_chain.class">Cravler\FayeAppBundle\Service\ExtensionsChain</parameter>
         <parameter key="cravler_faye_app.service.entry_point_manager.class">Cravler\FayeAppBundle\Service\EntryPointManager</parameter>
         <parameter key="cravler_faye_app.contribution.routing_resources_provider.class">Cravler\FayeAppBundle\Contribution\RoutingResourcesProvider</parameter>
     </parameters>
@@ -47,10 +48,15 @@
                  class="%cravler_faye_app.service.entry_points_chain.class%">
         </service>
 
+        <service id="cravler_faye_app.service.extensions_chain"
+                 class="%cravler_faye_app.service.extensions_chain.class%">
+        </service>
+
         <service id="cravler_faye_app.service.entry_point_manager"
                  class="%cravler_faye_app.service.entry_point_manager.class%">
             <argument type="service" id="cravler_faye_app.service.security_manager" />
             <argument type="service" id="cravler_faye_app.client" />
+            <argument>%cravler_faye_app.config.entry_point_prefix%</argument>
         </service>
 
         <service id="cravler_faye_app.contribution.routing_resources_provider"

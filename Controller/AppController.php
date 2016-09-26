@@ -4,7 +4,9 @@ namespace Cravler\FayeAppBundle\Controller;
 
 use Cravler\FayeAppBundle\Twig\FayeAppExtension;
 use Cravler\FayeAppBundle\Service\SecurityManager;
+use Cravler\FayeAppBundle\Service\ExtensionsChain;
 use Cravler\FayeAppBundle\Service\EntryPointsChain;
+use Cravler\FayeAppBundle\Ext\ContributorInterface;
 use Cravler\FayeAppBundle\EntryPoint\EntryPointInterface;
 use Cravler\FayeAppBundle\DependencyInjection\CravlerFayeAppExtension;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -48,10 +50,19 @@ class AppController extends Controller
         }
 
         $content = 'FayeApp.connect(' . json_encode(array(
-            'url'      => FayeAppExtension::generateUri($request, $config),
-            'security' => $security,
-            'options'  => $config['app']['options'],
-        ), JSON_PRETTY_PRINT|JSON_FORCE_OBJECT) . ');';
+            'url'                => FayeAppExtension::generateUri($request, $config),
+            'options'            => $config['app']['options'],
+            'security'           => $security,
+            'entry_point_prefix' => $config['entry_point_prefix'],
+        ), JSON_PRETTY_PRINT|JSON_FORCE_OBJECT) . ');' . PHP_EOL;
+
+        /* @var ExtensionsChain $extChain */
+        $extChain = $this->container->get('cravler_faye_app.service.extensions_chain');
+
+        /* @var ContributorInterface $ext */
+        foreach ($extChain->getExtensions() as $ext) {
+            $content .= $ext->getSource() . PHP_EOL;
+        }
 
         return new Response($content, 200, array('Content-Type' => $request->getMimeType('js')));
     }
@@ -94,7 +105,7 @@ class AppController extends Controller
             $key = explode('/', $channel, 3);
             if (count($key) == 3) {
                 $channel = '/' . $key[2];
-                $entryPoint = $entryPointsChain->getEntryPoint(str_replace('~', '.', $key[1]));
+                $entryPoint = $entryPointsChain->getEntryPoint(explode('@', str_replace('~', '.', $key[1]), 2)[1]);
             }
         }
 

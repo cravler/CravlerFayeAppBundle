@@ -23,13 +23,20 @@ class EntryPointManager
     private $client;
 
     /**
+     * @var string
+     */
+    private $entryPointPrefix;
+
+    /**
      * @param SecurityManager $sm
      * @param ClientInterface $client
+     * @param string          $entryPointPrefix
      */
-    public function __construct(SecurityManager $sm, ClientInterface $client)
+    public function __construct(SecurityManager $sm, ClientInterface $client, $entryPointPrefix = '')
     {
         $this->sm = $sm;
         $this->client = $client;
+        $this->entryPointPrefix = $entryPointPrefix;
     }
 
     /**
@@ -47,7 +54,7 @@ class EntryPointManager
      */
     public function publish(EntryPointInterface $entryPoint, $channel, $data = null)
     {
-        $channel = '/' . str_replace('.', '~', $entryPoint->getId()) . $channel;
+        $channel = '/' . str_replace('.', '~', $this->entryPointPrefix . '@' . $entryPoint->getId()) . $channel;
         $this->client->send($channel, $data, array(
             'security' => array(
                 'system' => $this->getSecurityManager()->createSystemToken()

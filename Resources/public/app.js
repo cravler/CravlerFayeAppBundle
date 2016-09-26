@@ -116,7 +116,7 @@ var FayeApp = (function() {
      */
     FayeApp.prototype.createEntryPoint = function(id) {
         if (!this.client) { throwError(); }
-        return new EntryPoint(id, this.client);
+        return new EntryPoint((this.config['entry_point_prefix'] || '') + '@' + id, this.client);
     };
 
     return new FayeApp();
