@@ -56,6 +56,7 @@
                  class="%cravler_faye_app.service.entry_point_manager.class%">
             <argument type="service" id="cravler_faye_app.service.security_manager" />
             <argument type="service" id="cravler_faye_app.client" />
+            <argument type="service" id="cravler_faye_app.service.extensions_chain" />
             <argument>%cravler_faye_app.config.entry_point_prefix%</argument>
         </service>
 

@@ -7,8 +7,4 @@ namespace Cravler\FayeAppBundle\Ext;
  */
 interface ContributorInterface
 {
-    /**
-     * @return string
-     */
-    public function getSource();
 }

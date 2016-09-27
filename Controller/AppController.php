@@ -2,11 +2,11 @@
 
 namespace Cravler\FayeAppBundle\Controller;
 
+use Cravler\FayeAppBundle\Ext\AppExtInterface;
 use Cravler\FayeAppBundle\Twig\FayeAppExtension;
 use Cravler\FayeAppBundle\Service\SecurityManager;
 use Cravler\FayeAppBundle\Service\ExtensionsChain;
 use Cravler\FayeAppBundle\Service\EntryPointsChain;
-use Cravler\FayeAppBundle\Ext\ContributorInterface;
 use Cravler\FayeAppBundle\EntryPoint\EntryPointInterface;
 use Cravler\FayeAppBundle\DependencyInjection\CravlerFayeAppExtension;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -59,9 +59,10 @@ class AppController extends Controller
         /* @var ExtensionsChain $extChain */
         $extChain = $this->container->get('cravler_faye_app.service.extensions_chain');
 
-        /* @var ContributorInterface $ext */
-        foreach ($extChain->getExtensions() as $ext) {
-            $content .= $ext->getSource() . PHP_EOL;
+        foreach ($extChain->getExtensions() as $extension) {
+            if ($extension instanceof AppExtInterface) {
+                $content .= $extension->getAppExt() . PHP_EOL;
+            }
         }
 
         return new Response($content, 200, array('Content-Type' => $request->getMimeType('js')));
