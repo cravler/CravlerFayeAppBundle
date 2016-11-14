@@ -39,10 +39,7 @@ class TerminateAdapter implements AdapterInterface
         $this->data[$url][] = $body;
     }
 
-    /**
-     * @param Event $event
-     */
-    public function onTerminate(Event $event)
+    public function postData()
     {
         if (!count($this->data)) {
             return;
@@ -58,5 +55,13 @@ class TerminateAdapter implements AdapterInterface
             }
         }
         $this->data = array();
+    }
+
+    /**
+     * @param Event $event
+     */
+    public function onTerminate(Event $event)
+    {
+        $this->postData();
     }
 }
