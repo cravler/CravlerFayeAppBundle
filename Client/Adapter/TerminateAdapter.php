@@ -2,7 +2,6 @@
 
 namespace Cravler\FayeAppBundle\Client\Adapter;
 
-use Nc\FayeClient\Adapter\AdapterInterface;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
