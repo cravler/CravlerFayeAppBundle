@@ -24,11 +24,10 @@ use Symfony\Component\HttpFoundation\Request;
 class AppController extends Controller
 {
     /**
-     * @Route("/init.js", name="faye_app_init")
      * @param Request $request
-     * @return Response
+     * @return array
      */
-    public function initAction(Request $request)
+    protected function getInitConfig(Request $request)
     {
         /* @var SecurityContextInterface $sc */
         $sc = $this->container->get('security.context');
@@ -41,6 +40,7 @@ class AppController extends Controller
         $security = array();
         if ($sc->getToken()) {
             if ($sc->getToken()->getUser() instanceof UserInterface) {
+                /* @var UserInterface $user */
                 $user = $sc->getToken()->getUser();
                 $security = array(
                     'username' => $user->getUsername(),
@@ -49,12 +49,35 @@ class AppController extends Controller
             }
         }
 
-        $content = 'FayeApp.connect(' . json_encode(array(
+        return array(
             'url'                => FayeAppExtension::generateUri($request, $config),
             'options'            => $config['app']['options'],
             'security'           => $security,
             'entry_point_prefix' => $config['entry_point_prefix'],
-        ), JSON_PRETTY_PRINT|JSON_FORCE_OBJECT) . ');' . PHP_EOL;
+        );
+    }
+
+    /**
+     * @Route("/config.json", name="faye_app_config")
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function configAction(Request $request)
+    {
+        return new JsonResponse($this->getInitConfig($request));
+    }
+
+    /**
+     * @Route("/init.js", name="faye_app_init")
+     * @param Request $request
+     * @return Response
+     */
+    public function initAction(Request $request)
+    {
+        $content = 'FayeApp.connect(' . json_encode(
+            $this->getInitConfig($request),
+            JSON_PRETTY_PRINT|JSON_FORCE_OBJECT
+        ) . ');' . PHP_EOL;
 
         /* @var ExtensionsChain $extChain */
         $extChain = $this->container->get('cravler_faye_app.service.extensions_chain');
