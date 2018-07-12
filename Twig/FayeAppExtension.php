@@ -3,6 +3,7 @@
 namespace Cravler\FayeAppBundle\Twig;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Cravler\FayeAppBundle\DependencyInjection\CravlerFayeAppExtension;
 
@@ -48,11 +49,9 @@ class FayeAppExtension extends \Twig_Extension
      */
     public function getUri()
     {
-        /* @var Request $request */
-        $request = $this->container->get('request');
         $config = $this->container->getParameter(CravlerFayeAppExtension::CONFIG_KEY);
 
-        return self::generateUri($request, $config);
+        return self::generateUri($this->getRequest(), $config);
     }
 
     /**
@@ -83,5 +82,16 @@ class FayeAppExtension extends \Twig_Extension
     public function getName()
     {
         return 'cravler_faye_app_twig_extension';
+    }
+
+    /**
+     * @return Request|null
+     */
+    private function getRequest()
+    {
+        /* @var RequestStack $requestStack */
+        $requestStack = $this->container->get('request_stack');
+
+        return $requestStack->getCurrentRequest();
     }
 }

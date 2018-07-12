@@ -11,9 +11,9 @@ use Cravler\FayeAppBundle\EntryPoint\EntryPointInterface;
 use Cravler\FayeAppBundle\DependencyInjection\CravlerFayeAppExtension;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\SecurityContextInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,8 +29,8 @@ class AppController extends Controller
      */
     protected function getInitConfig(Request $request)
     {
-        /* @var SecurityContextInterface $sc */
-        $sc = $this->container->get('security.context');
+        /* @var TokenStorageInterface $ts */
+        $ts = $this->container->get('security.token_storage');
 
         /* @var SecurityManager $sm */
         $sm = $this->container->get('cravler_faye_app.service.security_manager');
@@ -38,10 +38,10 @@ class AppController extends Controller
         $config = $this->container->getParameter(CravlerFayeAppExtension::CONFIG_KEY);
 
         $security = array();
-        if ($sc->getToken()) {
-            if ($sc->getToken()->getUser() instanceof UserInterface) {
+        if ($ts->getToken()) {
+            if ($ts->getToken()->getUser() instanceof UserInterface) {
                 /* @var UserInterface $user */
-                $user = $sc->getToken()->getUser();
+                $user = $ts->getToken()->getUser();
                 $security = array(
                     'username' => $user->getUsername(),
                     'token'    => $sm->createToken($user->getUsername()),
