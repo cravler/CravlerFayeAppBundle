@@ -31,8 +31,8 @@ class FayeAppExtension extends \Twig_Extension
     public function getFunctions()
     {
         return array(
-            'faye_app_javascript' => new \Twig_Function_Method($this, 'getJavascript', array('is_safe' => array('html'))),
-            'faye_app_uri'        => new \Twig_Function_Method($this, 'getUri'),
+            new \Twig_SimpleFunction('faye_app_javascript', array($this, 'getJavascript'), array('is_safe' => array('html'))),
+            new \Twig_SimpleFunction('faye_app_uri', array($this, 'getUri')),
         );
     }
 
