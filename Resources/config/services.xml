@@ -7,29 +7,21 @@
     <parameters>
         <parameter key="cravler_faye_app.client.client.class">Cravler\FayeAppBundle\Client\Client</parameter>
         <parameter key="cravler_faye_app.client.adapter.curl_adapter.class">Cravler\FayeAppBundle\Client\Adapter\CurlAdapter</parameter>
-        <parameter key="cravler_faye_app.client.adapter.terminate_adapter.class">Cravler\FayeAppBundle\Client\Adapter\TerminateAdapter</parameter>
+        <parameter key="cravler_faye_app.service.entry_point_manager.class">Cravler\FayeAppBundle\Service\EntryPointManager</parameter>
+        <parameter key="cravler_faye_app.service.package_manager.class">Cravler\FayeAppBundle\Service\PackageManager</parameter>
         <parameter key="cravler_faye_app.service.security_manager.class">Cravler\FayeAppBundle\Service\SecurityManager</parameter>
         <parameter key="cravler_faye_app.service.entry_points_chain.class">Cravler\FayeAppBundle\Service\EntryPointsChain</parameter>
         <parameter key="cravler_faye_app.service.extensions_chain.class">Cravler\FayeAppBundle\Service\ExtensionsChain</parameter>
-        <parameter key="cravler_faye_app.service.entry_point_manager.class">Cravler\FayeAppBundle\Service\EntryPointManager</parameter>
         <parameter key="cravler_faye_app.contribution.routing_resources_provider.class">Cravler\FayeAppBundle\Contribution\RoutingResourcesProvider</parameter>
     </parameters>
 
     <services>
 
         <service id="cravler_faye_app.client" alias="cravler_faye_app.client.client" />
-        <service id="cravler_faye_app.client.adapter" alias="cravler_faye_app.client.adapter.terminate_adapter" />
+        <service id="cravler_faye_app.client.adapter" alias="cravler_faye_app.client.adapter.curl_adapter" />
 
         <service id="cravler_faye_app.client.adapter.curl_adapter"
                  class="%cravler_faye_app.client.adapter.curl_adapter.class%">
-        </service>
-
-        <service id="cravler_faye_app.client.adapter.terminate_adapter"
-                 class="%cravler_faye_app.client.adapter.terminate_adapter.class%">
-            <argument type="service" id="cravler_faye_app.client.adapter.curl_adapter" />
-
-            <tag name="kernel.event_listener" event="kernel.terminate" method="onTerminate" />
-            <tag name="kernel.event_listener" event="console.terminate" method="onTerminate" />
         </service>
 
         <service id="cravler_faye_app.client.client"
@@ -39,23 +31,35 @@
         </service>
 
         <service id="cravler_faye_app.service.security_manager"
-                 class="%cravler_faye_app.service.security_manager.class%">
+                 class="%cravler_faye_app.service.security_manager.class%"
+                 public="true">
             <argument>%cravler_faye_app.config.secret%</argument>
             <argument>null</argument>
         </service>
 
+        <service id="cravler_faye_app.service.package_manager"
+                 class="%cravler_faye_app.service.package_manager.class%"
+                 public="true">
+            <argument type="service" id="cravler_faye_app.client" />
+
+            <tag name="kernel.event_listener" event="kernel.terminate" method="onTerminate" />
+            <tag name="kernel.event_listener" event="console.terminate" method="onTerminate" />
+        </service>
+
         <service id="cravler_faye_app.service.entry_points_chain"
-                 class="%cravler_faye_app.service.entry_points_chain.class%">
+                 class="%cravler_faye_app.service.entry_points_chain.class%"
+                 public="true">
         </service>
 
         <service id="cravler_faye_app.service.extensions_chain"
-                 class="%cravler_faye_app.service.extensions_chain.class%">
+                 class="%cravler_faye_app.service.extensions_chain.class%"
+                 public="true">
         </service>
 
         <service id="cravler_faye_app.service.entry_point_manager"
                  class="%cravler_faye_app.service.entry_point_manager.class%">
+            <argument type="service" id="cravler_faye_app.service.package_manager" />
             <argument type="service" id="cravler_faye_app.service.security_manager" />
-            <argument type="service" id="cravler_faye_app.client" />
             <argument type="service" id="cravler_faye_app.service.extensions_chain" />
             <argument>%cravler_faye_app.config.entry_point_prefix%</argument>
         </service>

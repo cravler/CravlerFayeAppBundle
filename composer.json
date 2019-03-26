@@ -20,8 +20,7 @@
     ],
     "require": {
         "php": ">=5.6",
-        "nc/faye-client": "~1.0",
-        "symfony/framework-bundle": "~2.8|^3.0"
+        "symfony/framework-bundle": "~2.8|^3.0|^4.0"
     },
     "autoload": {
         "psr-0": { "Cravler\\FayeAppBundle": "" }

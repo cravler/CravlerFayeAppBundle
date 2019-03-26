@@ -2,6 +2,9 @@
 
 namespace Cravler\FayeAppBundle\EntryPoint;
 
+use Cravler\FayeAppBundle\Package\Package;
+use Cravler\FayeAppBundle\Service\EntryPointManager;
+
 /**
  * @author Sergei Vizel <sergei.vizel@gmail.com>
  */
@@ -20,8 +23,14 @@ interface EntryPointInterface
     /**
      * @param string $channel
      * @param mixed $data
+     * @return Package
      */
     public function publish($channel, $data = null);
+
+    /**
+     * @param Package $package
+     */
+    public function flush(Package $package);
 
     /**
      * @param string $type

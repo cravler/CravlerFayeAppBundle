@@ -8,7 +8,7 @@ namespace Cravler\FayeAppBundle\EntryPoint;
 class Example extends AbstractEntryPoint
 {
     /**
-     * @return string
+     * {@inheritdoc}
      */
     public function getId()
     {
@@ -16,10 +16,7 @@ class Example extends AbstractEntryPoint
     }
 
     /**
-     * @param string $type
-     * @param string $channel
-     * @param array $message
-     * @return bool
+     * {@inheritdoc}
      */
     public function isGranted($type, $channel, array $message)
     {

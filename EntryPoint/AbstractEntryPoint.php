@@ -2,6 +2,7 @@
 
 namespace Cravler\FayeAppBundle\EntryPoint;
 
+use Cravler\FayeAppBundle\Package\Package;
 use Cravler\FayeAppBundle\Service\EntryPointManager;
 
 /**
@@ -31,19 +32,27 @@ abstract class AbstractEntryPoint implements EntryPointInterface
     }
 
     /**
-     * @param string $channel
-     * @param mixed $data
+     * {@inheritdoc}
      */
     public function publish($channel, $data = null)
     {
-        $this->epm->publish($this, $channel, $data);
+        $package = $this->epm->createPackage($this, $channel, $data);
+
+        $this->epm->getPackageManager()->persist($package);
+
+        return $package;
     }
 
     /**
-     * @param string $type
-     * @param string $channel
-     * @param array $message
-     * @return bool
+     * {@inheritdoc}
+     */
+    public function flush(Package $package)
+    {
+        $this->epm->getPackageManager()->flush($package);
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function isGranted($type, $channel, array $message)
     {
@@ -55,10 +64,7 @@ abstract class AbstractEntryPoint implements EntryPointInterface
     }
 
     /**
-     * @param string $type
-     * @param string $channel
-     * @param array $message
-     * @return bool|int
+     * {@inheritdoc}
      */
     public function useCache($type, $channel, array $message)
     {

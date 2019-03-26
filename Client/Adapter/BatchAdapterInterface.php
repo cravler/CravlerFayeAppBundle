@@ -5,11 +5,11 @@ namespace Cravler\FayeAppBundle\Client\Adapter;
 /**
  * @author Sergei Vizel <sergei.vizel@gmail.com>
  */
-interface AdapterInterface
+interface BatchAdapterInterface extends AdapterInterface
 {
     /**
      * @param string $url
-     * @param string $data
+     * @param string|string[] $data
      */
     public function postJSON($url, $data);
 }

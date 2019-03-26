@@ -8,10 +8,7 @@ namespace Cravler\FayeAppBundle\Client;
 interface ClientInterface
 {
     /**
-     * Send message
-     * @param string $channel message channel
-     * @param array  $data    Data to send
-     * @param array  $ext     Extra data
+     * @param array $packages
      */
-    public function send($channel, $data = array(), $ext = array());
+    public function send(array $packages);
 }

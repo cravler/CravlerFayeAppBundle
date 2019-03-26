@@ -2,11 +2,8 @@
 
 namespace Cravler\FayeAppBundle\Service;
 
-use Nc\FayeClient\Client;
-use Nc\FayeClient\Adapter\CurlAdapter;
-use Cravler\FayeAppBundle\Client\ClientInterface;
+use Cravler\FayeAppBundle\Package\Package;
 use Cravler\FayeAppBundle\Ext\SystemExtInterface;
-use Cravler\FayeAppBundle\Service\ExtensionsChain;
 use Cravler\FayeAppBundle\EntryPoint\EntryPointInterface;
 
 /**
@@ -15,14 +12,14 @@ use Cravler\FayeAppBundle\EntryPoint\EntryPointInterface;
 class EntryPointManager
 {
     /**
+     * @var PackageManager
+     */
+    private $pm;
+
+    /**
      * @var SecurityManager
      */
     private $sm;
-
-    /**
-     * @var Client
-     */
-    private $client;
 
     /**
      * @var ExtensionsChain
@@ -35,17 +32,25 @@ class EntryPointManager
     private $entryPointPrefix;
 
     /**
+     * @param PackageManager $pm
      * @param SecurityManager $sm
-     * @param ClientInterface $client
      * @param ExtensionsChain $extChain
-     * @param string          $entryPointPrefix
+     * @param string $entryPointPrefix
      */
-    public function __construct(SecurityManager $sm, ClientInterface $client, ExtensionsChain $extChain, $entryPointPrefix = '')
+    public function __construct(PackageManager $pm, SecurityManager $sm, ExtensionsChain $extChain, $entryPointPrefix = '')
     {
+        $this->pm = $pm;
         $this->sm = $sm;
-        $this->client = $client;
         $this->extChain = $extChain;
         $this->entryPointPrefix = $entryPointPrefix;
+    }
+
+    /**
+     * @return PackageManager
+     */
+    public function getPackageManager()
+    {
+        return $this->pm;
     }
 
     /**
@@ -60,11 +65,25 @@ class EntryPointManager
      * @param EntryPointInterface $entryPoint
      * @param string $channel
      * @param mixed $data
+     * @return Package
      */
-    public function publish(EntryPointInterface $entryPoint, $channel, $data = null)
+    public function createPackage(EntryPointInterface $entryPoint, $channel, $data = null)
     {
-        $channel = '/' . str_replace('.', '~', $this->entryPointPrefix . '@' . $entryPoint->getId()) . $channel;
-        $this->client->send($channel, $data, $this->getExt());
+        return new Package(array(
+            'channel' => $this->prepareChannel($entryPoint, $channel),
+            'data' => $data,
+            'ext' => $this->getExt(),
+        ));
+    }
+
+    /**
+     * @param EntryPointInterface $entryPoint
+     * @param string $channel
+     * @return string
+     */
+    private function prepareChannel(EntryPointInterface $entryPoint, $channel)
+    {
+        return '/' . str_replace('.', '~', $this->entryPointPrefix . '@' . $entryPoint->getId()) . $channel;
     }
 
     /**

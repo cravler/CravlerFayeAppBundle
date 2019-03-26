@@ -5,7 +5,7 @@ namespace Cravler\FayeAppBundle\Client\Adapter;
 /**
  * @author Sergei Vizel <sergei.vizel@gmail.com>
  */
-class CurlAdapter implements AdapterInterface
+class CurlAdapter implements BatchAdapterInterface
 {
     /**
      * {@inheritdoc}
