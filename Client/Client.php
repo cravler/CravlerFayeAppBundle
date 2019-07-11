@@ -13,6 +13,11 @@ class Client implements ClientInterface
     protected $adapter;
 
     /**
+     * @var array
+     */
+    protected $config;
+
+    /**
      * @var string
      */
     protected $fayeServerUrl;
@@ -24,12 +29,25 @@ class Client implements ClientInterface
     public function __construct(Adapter\AdapterInterface $adapter, array $config)
     {
         $this->adapter = $adapter;
+        $this->config = $config;
 
-        $url = ($config['scheme'] ?: 'http') . '://' . $config['host'];
-        if ($config['port']) {
-            $url = $url . ':' . $config['port'];
+        if (array_key_exists('url', $config)) {
+            $this->fayeServerUrl = $config['url'];
+        } else {
+            $url = ($config['scheme'] ?: 'http') . '://' . $config['host'];
+            if ($config['port']) {
+                $url = $url . ':' . $config['port'];
+            }
+            $this->fayeServerUrl = $url . $config['mount'];
         }
-        $this->fayeServerUrl = $url . $config['mount'];
+    }
+
+    /**
+     * @return array
+     */
+    public function getConfig()
+    {
+        return $this->config;
     }
 
     /**
