@@ -163,6 +163,8 @@ class AppController extends Controller
         $config = $this->container->getParameter(CravlerFayeAppExtension::CONFIG_KEY);
 
         $appCfg = $config['app'];
+        $healthCheckCfg = $config['health_check'];
+
         $scheme = $appCfg['scheme'] ?: $request->getScheme();
         $url = $scheme . '://' . $appCfg['host'];
         $port = 'https' == $scheme ? 443 : 80;
@@ -170,16 +172,25 @@ class AppController extends Controller
             $url = $url . ':' . $appCfg['port'];
             $port = $appCfg['port'];
         }
-        $url = $url . $appCfg['mount'];
+        $url = $url . ($healthCheckCfg['path'] ?: $appCfg['mount']);
 
         $status = 503;
         $content = 'Service Unavailable';
         try {
             $fp = fsockopen($appCfg['host'], $port, $errCode, $errStr, 1);
             if ($fp) {
+                stream_context_set_default(array(
+                    'ssl' => array(
+                        'verify_peer' => false,
+                        'verify_peer_name' => false,
+                    ),
+                ));
+
                 $headers = get_headers($url);
                 $code = intval(substr($headers[0], 9, 3));
-                if(400 == $code) {
+                $responseCode = $healthCheckCfg['response_code'] ?: 400;
+
+                if ($responseCode == $code) {
                     $status = 200;
                     $content = 'OK';
                 }
