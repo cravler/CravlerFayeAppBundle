@@ -22,6 +22,7 @@
 
         <service id="cravler_faye_app.client.adapter.curl_adapter"
                  class="%cravler_faye_app.client.adapter.curl_adapter.class%">
+            <argument>%cravler_faye_app.config.client_adapter%</argument>
         </service>
 
         <service id="cravler_faye_app.client.client"

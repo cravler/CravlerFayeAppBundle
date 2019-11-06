@@ -8,6 +8,19 @@ namespace Cravler\FayeAppBundle\Client\Adapter;
 class CurlAdapter implements BatchAdapterInterface
 {
     /**
+     * @var array
+     */
+    protected $config;
+
+    /**
+     * @param array $config
+     */
+    public function __construct(array $config)
+    {
+        $this->config = $config;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function postJSON($url, $data)
@@ -25,6 +38,9 @@ class CurlAdapter implements BatchAdapterInterface
                     $cmd .= " ; ";
                 }
                 $cmd .= "curl -X POST";
+                if (isset($this->config['connect_timeout'])) {
+                    $cmd .= " --connect-timeout " . $this->config['connect_timeout'];
+                }
                 $cmd .= " -H 'Content-Type: application/json'";
                 $cmd .= " -H 'Content-Length: " . strlen($body) . "'";
                 $cmd .= " -d '" . $body . "' " . "'" . $url . "'";
@@ -37,6 +53,9 @@ class CurlAdapter implements BatchAdapterInterface
             $mh = curl_multi_init();
             foreach ($data as $key => $body) {
                 $curl = curl_init($url);
+                if (isset($this->config['connect_timeout'])) {
+                    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, $this->config['connect_timeout']);
+                }
                 curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "POST");
                 curl_setopt($curl, CURLOPT_POSTFIELDS, $body);
                 curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
