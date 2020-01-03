@@ -2,15 +2,21 @@
 
 namespace Cravler\FayeAppBundle\Service;
 
-use Cravler\FayeAppBundle\Package\Package;
-use Cravler\FayeAppBundle\Ext\SystemExtInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Cravler\FayeAppBundle\EntryPoint\EntryPointInterface;
+use Cravler\FayeAppBundle\Ext\SystemExtInterface;
+use Cravler\FayeAppBundle\Package\Package;
 
 /**
  * @author Sergei Vizel <sergei.vizel@gmail.com>
  */
 class EntryPointManager
 {
+    /**
+     * @var UrlGeneratorInterface
+     */
+    private $router;
+
     /**
      * @var PackageManager
      */
@@ -32,17 +38,33 @@ class EntryPointManager
     private $entryPointPrefix;
 
     /**
+     * @var string
+     */
+    private $securityUrlSalt;
+
+    /**
+     * @param UrlGeneratorInterface $router
      * @param PackageManager $pm
      * @param SecurityManager $sm
      * @param ExtensionsChain $extChain
      * @param string $entryPointPrefix
+     * @param string $securityUrlSalt
      */
-    public function __construct(PackageManager $pm, SecurityManager $sm, ExtensionsChain $extChain, $entryPointPrefix = '')
+    public function __construct(
+        UrlGeneratorInterface $router,
+        PackageManager $pm,
+        SecurityManager $sm,
+        ExtensionsChain $extChain,
+        $entryPointPrefix = '',
+        $securityUrlSalt = ''
+    )
     {
         $this->pm = $pm;
         $this->sm = $sm;
+        $this->router = $router;
         $this->extChain = $extChain;
         $this->entryPointPrefix = $entryPointPrefix;
+        $this->securityUrlSalt = $securityUrlSalt;
     }
 
     /**
@@ -98,10 +120,15 @@ class EntryPointManager
             }
         }
 
+        $security = array(
+            'system' => $this->getSecurityManager()->createSystemToken(),
+            'url' => $this->router->generate('faye_app_security', [], 0),
+        );
+
+        $security['url.hash'] = md5($security['system'] . ';' . $security['url'] . ';' . $this->securityUrlSalt);
+
         $ext = array_replace_recursive($ext, array(
-            'security' => array(
-                'system' => $this->getSecurityManager()->createSystemToken()
-            ),
+            'security' => $security,
         ));
 
         return $ext;

@@ -34,10 +34,23 @@ class Client implements ClientInterface
         if (array_key_exists('url', $config)) {
             $this->fayeServerUrl = $config['url'];
         } else {
-            $url = ($config['scheme'] ?: 'http') . '://' . $config['host'];
+            $scheme = $config['scheme'] ?: 'http';
+            $url = $scheme . '://' . $config['host'];
+
             if ($config['port']) {
-                $url = $url . ':' . $config['port'];
+                $port = $config['port'];
+
+                if (80 == $port && 'http' == $scheme) {
+                    $port = null;
+                } else if (443 == $port && 'https' == $scheme) {
+                    $port = null;
+                }
+
+                if ($port) {
+                    $url = $url . ':' . $port;
+                }
             }
+
             $this->fayeServerUrl = $url . $config['mount'];
         }
     }

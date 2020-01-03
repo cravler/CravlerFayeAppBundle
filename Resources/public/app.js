@@ -60,7 +60,11 @@ var FayeApp = (function() {
         if (!this.anon) {
             this.anon = new FayeApp();
             var config = (JSON.parse(JSON.stringify(this.config)));
-            config.security = {};
+            if (config.security || false) {
+                if (config.security['username'] || false) {
+                    delete config.security['username'];
+                }
+            }
             this.anon.connect(config);
         }
         return this.anon;

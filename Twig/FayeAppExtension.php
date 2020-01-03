@@ -64,10 +64,22 @@ class FayeAppExtension extends \Twig_Extension
         if ($config['use_request_uri']) {
             $url = $request->getScheme() . '://' . $request->getHost();
         } else {
-            $url = ($config['app']['scheme'] ?: $request->getScheme()) . '://' . $config['app']['host'];
+            $scheme = $config['app']['scheme'] ?: $request->getScheme();
+
+            $url = $scheme . '://' . $config['app']['host'];
 
             if ($config['app']['port']) {
-                $url = $url . ':' . $config['app']['port'];
+                $port = $config['app']['port'];
+
+                if (80 == $port && 'http' == $scheme) {
+                    $port = null;
+                } else if (443 == $port && 'https' == $scheme) {
+                    $port = null;
+                }
+
+                if ($port) {
+                    $url = $url . ':' . $port;
+                }
             }
         }
 

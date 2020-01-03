@@ -49,6 +49,11 @@ class AppController extends Controller
             }
         }
 
+        $token = isset($security['token']) ? $security['token'] : 'anonymous';
+
+        $security['url'] = $this->generateUrl('faye_app_security', [], 0);
+        $security['url.hash'] = md5($token . ';' . $security['url'] . ';' . $config['security_url_salt']);
+
         return array(
             'url'                => FayeAppExtension::generateUri($request, $config),
             'options'            => $config['app']['options'],
@@ -123,7 +128,6 @@ class AppController extends Controller
                 $channel = $data['channel'];
             }
         }
-
 
         if ($channel) {
             $key = explode('/', $channel, 3);
