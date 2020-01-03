@@ -41,6 +41,9 @@ class CurlAdapter implements BatchAdapterInterface
                 if (isset($this->config['connect_timeout'])) {
                     $cmd .= " --connect-timeout " . $this->config['connect_timeout'];
                 }
+                if (isset($this->config['insecure']) && $this->config['insecure']) {
+                    $cmd .= " --insecure";
+                }
                 $cmd .= " -H 'Content-Type: application/json'";
                 $cmd .= " -H 'Content-Length: " . strlen($body) . "'";
                 $cmd .= " -d '" . $body . "' " . "'" . $url . "'";
@@ -55,6 +58,10 @@ class CurlAdapter implements BatchAdapterInterface
                 $curl = curl_init($url);
                 if (isset($this->config['connect_timeout'])) {
                     curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, $this->config['connect_timeout']);
+                }
+                if (isset($this->config['insecure']) && $this->config['insecure']) {
+                    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+                    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
                 }
                 curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "POST");
                 curl_setopt($curl, CURLOPT_POSTFIELDS, $body);
