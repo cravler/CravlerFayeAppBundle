@@ -4,13 +4,16 @@ This bundle depends on [faye-app](http://github.com/cravler/faye-app).
 
 ## Installation
 
-### Step 1: Update your vendors by running
+### Step 1: Download the Bundle
 
 ``` bash
-$ php composer.phar require cravler/faye-app-bundle:dev-master
+composer require cravler/faye-app-bundle:1.x-dev
 ```
 
-### Step 2: Enable the bundle
+This command requires you to have Composer installed globally, as explained
+in the [installation chapter](https://getcomposer.org/doc/00-intro.md) of the Composer documentation.
+
+### Step 2: Enable the Bundle
 
 ``` php
 <?php
