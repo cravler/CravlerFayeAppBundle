@@ -7,7 +7,7 @@ This bundle depends on [faye-app](http://github.com/cravler/faye-app).
 ### Step 1: Download the Bundle
 
 ``` bash
-composer require cravler/faye-app-bundle:1.x-dev
+composer require cravler/faye-app-bundle:2.x-dev
 ```
 
 This command requires you to have Composer installed globally, as explained
@@ -15,27 +15,27 @@ in the [installation chapter](https://getcomposer.org/doc/00-intro.md) of the Co
 
 ### Step 2: Enable the Bundle
 
+This bundle should be automatically enabled by [Flex](https://symfony.com/doc/current/setup/flex.html).
+In case you don't use Flex, you'll need to manually enable the bundle by
+adding the following line in the `config/bundles.php` file of your project:
+
 ``` php
 <?php
-// app/AppKernel.php
+// config/bundles.php
 
-public function registerBundles()
-{
-    $bundles = array(
-        // ...
-
-        new Cravler\FayeAppBundle\CravlerFayeAppBundle(),
-    );
-}
+return [
+    // ...
+    Cravler\FayeAppBundle\CravlerFayeAppBundle::class => ['all' => true],
+];
 ```
 
 ### Step 3: Add routing
 
 ``` yaml
-# app/config/routing.yml
+# config/routes.yaml
 
 cravler_faye_app:
-    resource: "@CravlerFayeAppBundle/Resources/config/routing.yml"
+    resource: "@CravlerFayeAppBundle/Resources/config/routing.yaml"
 ```
 
 ### Step 4: Include Javascript
@@ -131,7 +131,7 @@ The default configuration for the bundle looks like this:
 cravler_faye_app:
     example: false
     user_provider: false #security.user.provider.concrete.[provider_name]
-    route_url_prefix: faye-app
+    route_url_prefix: /faye-app
     use_request_uri: false
     secret: ThisTokenIsNotSoSecretChangeIt
     app:

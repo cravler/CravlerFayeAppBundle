@@ -15,7 +15,7 @@ class RoutingResourcesProvider implements ContributorInterface
     public function getItems()
     {
         return array(
-            '@CravlerFayeAppBundle/Resources/config/routing.yml'
+            '@CravlerFayeAppBundle/Resources/config/routing.yaml'
         );
     }
 }

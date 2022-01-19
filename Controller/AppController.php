@@ -6,7 +6,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Cravler\FayeAppBundle\DependencyInjection\CravlerFayeAppExtension;
 use Cravler\FayeAppBundle\EntryPoint\EntryPointInterface;
@@ -19,7 +19,7 @@ use Cravler\FayeAppBundle\Ext\AppExtInterface;
 /**
  * @author Sergei Vizel <sergei.vizel@gmail.com>
  */
-class AppController extends Controller
+class AppController extends AbstractController
 {
     /**
      * @param Request $request
@@ -216,7 +216,7 @@ class AppController extends Controller
         $sm = $this->container->get('cravler_faye_app.service.security_manager');
 
         return $this->render(
-            'CravlerFayeAppBundle:App:example.html.twig',
+            '@CravlerFayeApp/App/example.html.twig',
             array(
                 'system'   => $type == 'system',
                 'security' => array(

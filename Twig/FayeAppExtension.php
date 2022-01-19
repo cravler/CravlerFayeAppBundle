@@ -2,6 +2,8 @@
 
 namespace Cravler\FayeAppBundle\Twig;
 
+use Twig\TwigFunction;
+use Twig\Extension\AbstractExtension;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -10,7 +12,7 @@ use Cravler\FayeAppBundle\DependencyInjection\CravlerFayeAppExtension;
 /**
  * @author Sergei Vizel <sergei.vizel@gmail.com>
  */
-class FayeAppExtension extends \Twig_Extension
+class FayeAppExtension extends AbstractExtension
 {
     /**
      * @var ContainerInterface
@@ -31,8 +33,8 @@ class FayeAppExtension extends \Twig_Extension
     public function getFunctions()
     {
         return array(
-            new \Twig_SimpleFunction('faye_app_javascript', array($this, 'getJavascript'), array('is_safe' => array('html'))),
-            new \Twig_SimpleFunction('faye_app_uri', array($this, 'getUri')),
+            new TwigFunction('faye_app_javascript', array($this, 'getJavascript'), array('is_safe' => array('html'))),
+            new TwigFunction('faye_app_uri', array($this, 'getUri')),
         );
     }
 
@@ -41,7 +43,7 @@ class FayeAppExtension extends \Twig_Extension
      */
     public function getJavascript()
     {
-        return $this->container->get('templating')->render('CravlerFayeAppBundle:App:javascript.html.twig');
+        return $this->container->get('twig')->render('@CravlerFayeApp/App/javascript.html.twig');
     }
 
     /**

@@ -1,0 +1,20 @@
+
+faye_app_config:
+    path: "%cravler_faye_app.config.route_url_prefix%/config.json"
+    defaults: { _controller: Cravler\FayeAppBundle\Controller\AppController::configAction }
+
+faye_app_init:
+    path: "%cravler_faye_app.config.route_url_prefix%/init.js"
+    defaults: { _controller: Cravler\FayeAppBundle\Controller\AppController::initAction }
+
+faye_app_security:
+    path: "%cravler_faye_app.config.route_url_prefix%/security"
+    defaults: { _controller: Cravler\FayeAppBundle\Controller\AppController::securityAction }
+
+faye_app_status:
+    path: "%cravler_faye_app.config.route_url_prefix%/status"
+    defaults: { _controller: Cravler\FayeAppBundle\Controller\AppController::statusAction }
+
+faye_app_example:
+    path: "%cravler_faye_app.config.route_url_prefix%/example/{type}"
+    defaults: { _controller: Cravler\FayeAppBundle\Controller\AppController::exampleAction, type: ~ }
