@@ -12,13 +12,18 @@
         <parameter key="cravler_faye_app.service.security_manager.class">Cravler\FayeAppBundle\Service\SecurityManager</parameter>
         <parameter key="cravler_faye_app.service.entry_points_chain.class">Cravler\FayeAppBundle\Service\EntryPointsChain</parameter>
         <parameter key="cravler_faye_app.service.extensions_chain.class">Cravler\FayeAppBundle\Service\ExtensionsChain</parameter>
-        <parameter key="cravler_faye_app.contribution.routing_resources_provider.class">Cravler\FayeAppBundle\Contribution\RoutingResourcesProvider</parameter>
     </parameters>
 
     <services>
+        <!-- aliases -->
 
-        <service id="cravler_faye_app.client" alias="cravler_faye_app.client.client" />
-        <service id="cravler_faye_app.client.adapter" alias="cravler_faye_app.client.adapter.curl_adapter" />
+        <service id="cravler_faye_app.client"
+                 alias="cravler_faye_app.client.client" />
+
+        <service id="cravler_faye_app.client.adapter"
+                 alias="cravler_faye_app.client.adapter.curl_adapter" />
+
+        <!-- clients -->
 
         <service id="cravler_faye_app.client.adapter.curl_adapter"
                  class="%cravler_faye_app.client.adapter.curl_adapter.class%">
@@ -30,6 +35,8 @@
             <argument type="service" id="cravler_faye_app.client.adapter" />
             <argument>%cravler_faye_app.config.app%</argument>
         </service>
+
+        <!-- services -->
 
         <service id="cravler_faye_app.service.security_manager"
                  class="%cravler_faye_app.service.security_manager.class%"
@@ -66,13 +73,6 @@
             <argument>%cravler_faye_app.config.entry_point_prefix%</argument>
             <argument>%cravler_faye_app.config.security_url_salt%</argument>
         </service>
-
-        <service id="cravler_faye_app.contribution.routing_resources_provider"
-                 class="%cravler_faye_app.contribution.routing_resources_provider.class%">
-
-            <tag name="modera_routing.routing_resources_provider" />
-        </service>
-
     </services>
 
 </container>

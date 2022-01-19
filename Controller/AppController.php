@@ -2,21 +2,19 @@
 
 namespace Cravler\FayeAppBundle\Controller;
 
-use Cravler\FayeAppBundle\Ext\AppExtInterface;
-use Cravler\FayeAppBundle\Twig\FayeAppExtension;
-use Cravler\FayeAppBundle\Service\SecurityManager;
-use Cravler\FayeAppBundle\Service\ExtensionsChain;
-use Cravler\FayeAppBundle\Service\EntryPointsChain;
-use Cravler\FayeAppBundle\EntryPoint\EntryPointInterface;
-use Cravler\FayeAppBundle\DependencyInjection\CravlerFayeAppExtension;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Cravler\FayeAppBundle\DependencyInjection\CravlerFayeAppExtension;
+use Cravler\FayeAppBundle\EntryPoint\EntryPointInterface;
+use Cravler\FayeAppBundle\Service\EntryPointsChain;
+use Cravler\FayeAppBundle\Service\ExtensionsChain;
+use Cravler\FayeAppBundle\Service\SecurityManager;
+use Cravler\FayeAppBundle\Twig\FayeAppExtension;
+use Cravler\FayeAppBundle\Ext\AppExtInterface;
 
 /**
  * @author Sergei Vizel <sergei.vizel@gmail.com>
@@ -63,7 +61,6 @@ class AppController extends Controller
     }
 
     /**
-     * @Route("/config.json", name="faye_app_config")
      * @param Request $request
      * @return JsonResponse
      */
@@ -73,7 +70,6 @@ class AppController extends Controller
     }
 
     /**
-     * @Route("/init.js", name="faye_app_init")
      * @param Request $request
      * @return Response
      */
@@ -97,7 +93,6 @@ class AppController extends Controller
     }
 
     /**
-     * @Route("/security", name="faye_app_security")
      * @param Request $request
      * @return JsonResponse
      */
@@ -158,7 +153,6 @@ class AppController extends Controller
     }
 
     /**
-     * @Route("/status", name="faye_app_status")
      * @param Request $request
      * @return Response
      */
@@ -206,8 +200,9 @@ class AppController extends Controller
     }
 
     /**
-     * @Route("/example/{type}", defaults={"type"=null}, name="faye_app_example")
-     * @Template()
+     * @param Request $request
+     * @param string|null $type
+     * @return array
      */
     public function exampleAction(Request $request, $type = null)
     {
@@ -220,11 +215,14 @@ class AppController extends Controller
         /* @var SecurityManager $sm */
         $sm = $this->container->get('cravler_faye_app.service.security_manager');
 
-        return array(
-            'system'   => $type == 'system',
-            'security' => array(
-                'system' => $sm->createSystemToken(),
-            ),
+        return $this->render(
+            'CravlerFayeAppBundle:App:example.html.twig',
+            array(
+                'system'   => $type == 'system',
+                'security' => array(
+                    'system' => $sm->createSystemToken(),
+                ),
+            )
         );
     }
 }
