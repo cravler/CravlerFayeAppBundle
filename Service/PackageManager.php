@@ -2,7 +2,7 @@
 
 namespace Cravler\FayeAppBundle\Service;
 
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 use Cravler\FayeAppBundle\Client\ClientInterface;
 use Cravler\FayeAppBundle\Package\Package;
 
