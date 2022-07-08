@@ -2,7 +2,6 @@
 
 namespace Cravler\FayeAppBundle\Service;
 
-use Symfony\Contracts\EventDispatcher\Event;
 use Cravler\FayeAppBundle\Client\ClientInterface;
 use Cravler\FayeAppBundle\Package\Package;
 
@@ -62,10 +61,7 @@ class PackageManager
         }
     }
 
-    /**
-     * @param Event $event
-     */
-    public function onTerminate(Event $event)
+    public function onTerminate()
     {
         $this->flush();
     }
