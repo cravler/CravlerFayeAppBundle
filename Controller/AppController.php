@@ -71,11 +71,12 @@ class AppController extends AbstractController
 
     /**
      * @param Request $request
+     * @param null|string $connection
      * @return Response
      */
-    public function initAction(Request $request)
+    public function initAction(Request $request, ?string $connection = null)
     {
-        $content = 'FayeApp.connect(' . json_encode(
+        $content = 'FayeApp.init(' . json_encode(
             $this->getInitConfig($request),
             JSON_PRETTY_PRINT|JSON_FORCE_OBJECT
         ) . ');' . PHP_EOL;
@@ -85,9 +86,18 @@ class AppController extends AbstractController
 
         foreach ($extChain->getExtensions() as $extension) {
             if ($extension instanceof AppExtInterface) {
-                $content .= $extension->getAppExt() . PHP_EOL;
+                $content .= $extension->getAppExt($connection) . PHP_EOL;
             }
         }
+
+        $content = implode(PHP_EOL, [
+            '(function(FayeApp) {',
+            implode(PHP_EOL, array_map(
+                fn (string $line) => str_repeat(' ', 4) . $line,
+                explode(PHP_EOL, trim($content)))
+            ),
+            '})(FayeApp' . ($connection ? '.connection(\'' . $connection . '\')' : '') . ');',
+        ]) . PHP_EOL;
 
         return new Response($content, 200, array('Content-Type' => $request->getMimeType('js')));
     }

@@ -7,6 +7,10 @@ faye_app_init:
     path: "%cravler_faye_app.config.route_url_prefix%/init.js"
     defaults: { _controller: Cravler\FayeAppBundle\Controller\AppController::initAction }
 
+faye_app_init_by_connection:
+    path: "%cravler_faye_app.config.route_url_prefix%/{connection}/init.js"
+    defaults: { _controller: Cravler\FayeAppBundle\Controller\AppController::initAction }
+
 faye_app_security:
     path: "%cravler_faye_app.config.route_url_prefix%/security"
     defaults: { _controller: Cravler\FayeAppBundle\Controller\AppController::securityAction }

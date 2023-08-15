@@ -1,7 +1,7 @@
 var FayeApp = (function() {
 
     function throwError() {
-        throw new Error('Connection not established, please run FayeApp.connect({...}).');
+        throw new Error('Connection not established, please run FayeApp.init({...}).');
     }
 
     function EntryPoint(id, client) {
@@ -34,7 +34,7 @@ var FayeApp = (function() {
      * @param config
      * @returns {FayeApp}
      */
-    FayeApp.prototype.connect = function(config) {
+    FayeApp.prototype.init = function(config) {
         if (this.client) { throw new Error('Connection already established.'); }
         this.config = config;
         this.client = new Faye.Client(config.url, config.options || {});
@@ -51,6 +51,7 @@ var FayeApp = (function() {
         });
         return this;
     };
+    FayeApp.prototype.connect = FayeApp.prototype.init;
 
     /**
      * @returns {FayeApp}
@@ -65,7 +66,7 @@ var FayeApp = (function() {
                     delete config.security['username'];
                 }
             }
-            this.anon.connect(config);
+            this.anon.init(config);
         }
         return this.anon;
     };
@@ -123,5 +124,16 @@ var FayeApp = (function() {
         return new EntryPoint((this.config['entry_point_prefix'] || '') + '@' + id, this.client);
     };
 
-    return new FayeApp();
+    var connections = {
+        'default': new FayeApp()
+    };
+
+    connections['default'].connection = function(name) {
+        if (connections.hasOwnProperty(name)) {
+            return connections[name];
+        }
+        return connections[name] = new FayeApp();
+    };
+
+    return connections['default'];
 })();

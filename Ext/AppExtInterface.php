@@ -7,8 +7,5 @@ namespace Cravler\FayeAppBundle\Ext;
  */
 interface AppExtInterface extends ContributorInterface
 {
-    /**
-     * @return string
-     */
-    public function getAppExt();
+    public function getAppExt(?string $connection = null): string;
 }
