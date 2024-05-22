@@ -123,6 +123,13 @@ class AppController extends AbstractController
         $channel = null;
         $entryPoint = null;
 
+        if ('json' === $request->getContentType()) {
+            $content = $request->getContent();
+            if (!empty($content) && is_array($arr = json_decode($content, true))) {
+                $request->request->replace($arr);
+            }
+        }
+
         $data = $request->request->all();
         if (isset($data['channel'])) {
             if ($data['channel'] === '/meta/subscribe') {
