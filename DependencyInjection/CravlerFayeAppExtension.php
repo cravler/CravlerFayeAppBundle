@@ -35,10 +35,6 @@ class CravlerFayeAppExtension extends Extension
         $loader->load('controller.xml');
         $loader->load('services.xml');
 
-        if (interface_exists('Sli\ExpanderBundle\Ext\ContributorInterface')) {
-            $loader->load('routing.xml');
-        }
-
         if ($config['example']) {
             $loader->load('example/services.xml');
         }
