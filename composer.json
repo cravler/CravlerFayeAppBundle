@@ -20,15 +20,15 @@
     ],
     "require": {
         "php": ">=7.4",
-        "symfony/framework-bundle": "^4.4|^5.0",
-        "twig/twig": "^2.4|^3.0"
+        "symfony/framework-bundle": "^5.4|^6.0",
+        "twig/twig": "^2.13|^3.0"
     },
     "autoload": {
         "psr-4": { "Cravler\\FayeAppBundle\\": "" }
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "2.x-dev"
+            "dev-master": "3.x-dev"
         },
         "modera-module": {
             "register-bundle": "Cravler\\FayeAppBundle\\CravlerFayeAppBundle"
