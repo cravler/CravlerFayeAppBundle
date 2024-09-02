@@ -62,8 +62,8 @@ var FayeApp = (function() {
             this.anon = new FayeApp();
             var config = (JSON.parse(JSON.stringify(this.config)));
             if (config.security || false) {
-                if (config.security['username'] || false) {
-                    delete config.security['username'];
+                if (config.security['userIdentifier'] || false) {
+                    delete config.security['userIdentifier'];
                 }
             }
             this.anon.init(config);

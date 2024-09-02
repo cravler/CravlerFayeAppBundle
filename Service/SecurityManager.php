@@ -2,57 +2,41 @@
 
 namespace Cravler\FayeAppBundle\Service;
 
+use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 
 /**
  * @author Sergei Vizel <sergei.vizel@gmail.com>
  */
 class SecurityManager
 {
-    /**
-     * @var string
-     */
-    private $secret;
+    private string $secret;
 
-    /**
-     * @var UserProviderInterface
-     */
-    private $provider;
+    private ?UserProviderInterface $provider;
 
-    /**
-     * @param string $secret
-     * @param UserProviderInterface $provider
-     */
-    public function __construct($secret, UserProviderInterface $provider = null)
-    {
+    public function __construct(
+        string $secret,
+        ?UserProviderInterface $provider = null
+    ) {
         $this->secret = $secret;
         $this->provider = $provider;
     }
 
-    /**
-     * @param string $username
-     * @return string
-     */
-    public function createToken($username)
+    public function createToken(string $userIdentifier): string
     {
-        return hash_hmac('sha256', $username, $this->secret);
+        return \hash_hmac('sha256', $userIdentifier, $this->secret);
+    }
+
+    public function createSystemToken(): string
+    {
+        return \hash_hmac('sha512', '--[system-token]--', $this->secret);
     }
 
     /**
-     * @return string
+     * @param array{'system'?: string} $data
      */
-    public function createSystemToken()
-    {
-        return hash_hmac('sha512', '--[system-token]--', $this->secret);
-    }
-
-    /**
-     * @param array $data
-     * @return bool
-     */
-    public function isSystem(array $data)
+    public function isSystem(array $data): bool
     {
         if (isset($data['system']) && $data['system'] == $this->createSystemToken()) {
             return true;
@@ -62,31 +46,31 @@ class SecurityManager
     }
 
     /**
-     * @param array $data
-     * @return array
+     * @param array{'userIdentifier'?: string, 'token'?: string} $data
      */
-    public function getUser(array $data)
+    public function getUser(array $data): ?UserInterface
     {
-        if (isset($data['username']) && isset($data['token'])) {
-            if ($this->createToken($data['username']) == $data['token']) {
-                return $this->findUser($data['username']);
+        if (isset($data['userIdentifier']) && isset($data['token'])) {
+            if ($this->createToken($data['userIdentifier']) == $data['token']) {
+                return $this->findUser($data['userIdentifier']);
             }
         }
 
         return null;
     }
 
-    /**
-     * @param string $username
-     * @return null|UserInterface
-     */
-    public function findUser($username)
+    private function findUser(string $userIdentifier): ?UserInterface
     {
         $user = null;
-        if ($this->provider && $username) {
+
+        if ($this->provider && $userIdentifier) {
             try {
-                $user = $this->provider->loadUserByUsername($username);
-            } catch (UsernameNotFoundException $e) {
+                if (\method_exists($this->provider, 'loadUserByIdentifier')) {
+                    $user = $this->provider->loadUserByIdentifier($userIdentifier);
+                } else {
+                    $user = $this->provider->loadUserByUsername($userIdentifier);
+                }
+            } catch (UserNotFoundException $e) {
                 //
             }
         }
