@@ -3,49 +3,45 @@
 namespace Cravler\FayeAppBundle\EntryPoint;
 
 /**
- * @author Sergei Vizel <sergei.vizel@gmail.com>
+ * @author Sergei Vizel
+ *
+ * @see https://github.com/cravler
  */
 class Example extends AbstractEntryPoint
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function getId()
+    public function getId(): string
     {
         return 'faye-app.example';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isGranted($type, $channel, array $message)
+    public function isGranted(string $type, string $channel, array $message): bool
     {
         $user = null;
-        if (isset($message['ext']['security'])) {
+        if (\is_array($message['ext'] ?? null) && \is_array($message['ext']['security'])) {
             $sm = $this->getEntryPointManager()->getSecurityManager();
             $user = $sm->getUser($message['ext']['security']);
         }
 
         // check user permissions, if needed
 
-        $parts = explode('/', $channel);
+        $parts = \explode('/', $channel);
 
-        if (self::TYPE_SUBSCRIBE == $type) {
-            if (in_array($parts[count($parts) - 1], array('*', '**'))) {
+        if (self::TYPE_SUBSCRIBE === $type) {
+            if (\in_array($parts[\count($parts) - 1], ['*', '**'])) {
                 return false;
             }
 
-            if (in_array($parts[1], array('baz'))) {
+            if (\in_array($parts[1], ['baz'])) {
                 return false;
             }
 
             return true;
-        } else {
-            if (in_array($parts[1], array('foo', 'baz'))) {
-                return true;
-            }
-
-            return false;
         }
+
+        if (\in_array($parts[1], ['foo', 'baz'])) {
+            return true;
+        }
+
+        return false;
     }
 }

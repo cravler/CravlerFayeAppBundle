@@ -7,20 +7,19 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 
 /**
- * @author Sergei Vizel <sergei.vizel@gmail.com>
+ * @author Sergei Vizel
+ *
+ * @see https://github.com/cravler
  */
 class SecurityManager
 {
-    private string $secret;
-
-    private ?UserProviderInterface $provider;
-
+    /**
+     * @param ?UserProviderInterface<UserInterface> $provider
+     */
     public function __construct(
-        string $secret,
-        ?UserProviderInterface $provider = null
+        private readonly string $secret,
+        private readonly ?UserProviderInterface $provider = null,
     ) {
-        $this->secret = $secret;
-        $this->provider = $provider;
     }
 
     public function createToken(string $userIdentifier): string
@@ -38,7 +37,7 @@ class SecurityManager
      */
     public function isSystem(array $data): bool
     {
-        if (isset($data['system']) && $data['system'] == $this->createSystemToken()) {
+        if (isset($data['system']) && $data['system'] === $this->createSystemToken()) {
             return true;
         }
 
@@ -51,7 +50,7 @@ class SecurityManager
     public function getUser(array $data): ?UserInterface
     {
         if (isset($data['userIdentifier']) && isset($data['token'])) {
-            if ($this->createToken($data['userIdentifier']) == $data['token']) {
+            if ($this->createToken($data['userIdentifier']) === $data['token']) {
                 return $this->findUser($data['userIdentifier']);
             }
         }
@@ -65,13 +64,8 @@ class SecurityManager
 
         if ($this->provider && $userIdentifier) {
             try {
-                if (\method_exists($this->provider, 'loadUserByIdentifier')) {
-                    $user = $this->provider->loadUserByIdentifier($userIdentifier);
-                } else {
-                    $user = $this->provider->loadUserByUsername($userIdentifier);
-                }
+                $user = $this->provider->loadUserByIdentifier($userIdentifier);
             } catch (UserNotFoundException $e) {
-                //
             }
         }
 

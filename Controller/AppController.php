@@ -13,39 +13,56 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\AsController;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * @author Sergei Vizel <sergei.vizel@gmail.com>
+ * @author Sergei Vizel
+ *
+ * @see https://github.com/cravler
  */
+#[AsController]
 class AppController extends AbstractController
 {
-    private ?TokenStorageInterface $tokenStorage;
-
     public function __construct(
-        ?TokenStorageInterface $tokenStorage
+        private readonly EntryPointsChain $entryPointsChain,
+        private readonly ExtensionsChain $extensionsChain,
+        private readonly SecurityManager $securityManager,
+        private readonly ?TokenStorageInterface $tokenStorage = null,
     ) {
-        $this->tokenStorage = $tokenStorage;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getInitConfig(Request $request): array
     {
-        /** @var SecurityManager $sm */
-        $sm = $this->container->get('cravler_faye_app.service.security_manager');
-
-        $config = $this->container->getParameter(CravlerFayeAppExtension::CONFIG_KEY);
+        /** @var array{
+         *      'app': array{
+         *          'scheme'?: string,
+         *          'host': string,
+         *          'port'?: int,
+         *          'mount': string,
+         *          'options': array<string, mixed>,
+         *      },
+         *      'entry_point_prefix': string,
+         *      'security_url_salt': string,
+         * } $config
+         */
+        $config = $this->getParameter(CravlerFayeAppExtension::CONFIG_KEY);
 
         $security = [];
         if ($this->tokenStorage && $this->tokenStorage->getToken()) {
             if ($this->tokenStorage->getToken()->getUser() instanceof UserInterface) {
                 /** @var UserInterface $user */
                 $user = $this->tokenStorage->getToken()->getUser();
-                $userIdentifier = \method_exists($user, 'getUserIdentifier') ? $user->getUserIdentifier() : $user->getUsername();
+                $userIdentifier = $user->getUserIdentifier();
 
                 $security = [
                     'userIdentifier' => $userIdentifier,
-                    'token' => $sm->createToken($userIdentifier),
+                    'token' => $this->securityManager->createToken($userIdentifier),
                 ];
             }
         }
@@ -63,22 +80,22 @@ class AppController extends AbstractController
         ];
     }
 
+    #[Route('/config.json', methods: [Request::METHOD_GET], name: 'faye_app_config')]
     public function configAction(Request $request): JsonResponse
     {
         return new JsonResponse($this->getInitConfig($request));
     }
 
+    #[Route('/init.js', methods: [Request::METHOD_GET], name: 'faye_app_init')]
+    #[Route('/{connection}/init.js', methods: [Request::METHOD_GET], name: 'faye_app_init_by_connection')]
     public function initAction(Request $request, ?string $connection = null): Response
     {
         $content = 'FayeApp.init('.\json_encode(
             $this->getInitConfig($request),
-            \JSON_PRETTY_PRINT|\JSON_FORCE_OBJECT
+            \JSON_PRETTY_PRINT | \JSON_FORCE_OBJECT
         ).');'.\PHP_EOL;
 
-        /** @var ExtensionsChain $extChain */
-        $extChain = $this->container->get('cravler_faye_app.service.extensions_chain');
-
-        foreach ($extChain->getExtensions() as $extension) {
+        foreach ($this->extensionsChain->getExtensions() as $extension) {
             if ($extension instanceof AppExtInterface) {
                 $content .= $extension->getAppExt($connection).\PHP_EOL;
             }
@@ -96,14 +113,9 @@ class AppController extends AbstractController
         return new Response($content, Response::HTTP_OK, ['Content-Type' => $request->getMimeType('js')]);
     }
 
+    #[Route('/security', methods: [Request::METHOD_POST], name: 'faye_app_security')]
     public function securityAction(Request $request): JsonResponse
     {
-        /** @var EntryPointsChain $entryPointsChain */
-        $entryPointsChain = $this->container->get('cravler_faye_app.service.entry_points_chain');
-
-        /** @var SecurityManager $sm */
-        $sm = $this->container->get('cravler_faye_app.service.security_manager');
-
         $response = [
             'success' => false,
             'cache' => false,
@@ -124,9 +136,11 @@ class AppController extends AbstractController
         if (isset($data['channel'])) {
             if ('/meta/subscribe' === $data['channel']) {
                 $type = EntryPointInterface::TYPE_SUBSCRIBE;
+                /** @var string $channel */
                 $channel = $data['subscription'];
             } else {
                 $type = EntryPointInterface::TYPE_PUBLISH;
+                /** @var string $channel */
                 $channel = $data['channel'];
             }
         }
@@ -135,41 +149,55 @@ class AppController extends AbstractController
             $key = \explode('/', $channel, 3);
             if (3 === \count($key)) {
                 $channel = '/'.$key[2];
-                $entryPoint = $entryPointsChain->getEntryPoint(\explode('@', \str_replace('~', '.', $key[1]), 2)[1]);
+                $entryPoint = $this->entryPointsChain->getEntryPoint(\explode('@', \str_replace('~', '.', $key[1]), 2)[1]);
             }
         }
 
         $message = [
-            'ext' => isset($data['ext']) ? $data['ext'] : [],
-            'data' => isset($data['data']) ? $data['data'] : [],
-            'clientId' => isset($data['clientId']) ? $data['clientId'] : null,
+            'ext' => \is_array($data['ext'] ?? null) ? $data['ext'] : [],
+            'data' => \is_array($data['data'] ?? null) ? $data['data'] : [],
+            'clientId' => \is_string($data['clientId'] ?? null) ? $data['clientId'] : null,
         ];
 
-        if (isset($message['ext']['security']) && $sm->isSystem($message['ext']['security'])) {
+        if (\is_array($message['ext']['security'] ?? null) && $this->securityManager->isSystem($message['ext']['security'])) {
             $response['success'] = true;
-        } elseif ($entryPoint && $entryPoint->isGranted($type, $channel, $message)) {
+        } elseif (\is_string($type) && \is_string($channel) && $entryPoint?->isGranted($type, $channel, $message)) {
             $response['success'] = true;
             $response['cache'] = $entryPoint->useCache($type, $channel, $message);
         }
 
-        if (false === $response['success'] && !isset($response['msg'])) {
+        if (false === $response['success']) {
             $response['msg'] = Response::HTTP_FORBIDDEN.'::'.Response::$statusTexts[Response::HTTP_FORBIDDEN];
         }
 
         return new JsonResponse($response);
     }
 
+    #[Route('/status', methods: [Request::METHOD_GET], name: 'faye_app_status')]
     public function statusAction(Request $request): Response
     {
-        $config = $this->container->getParameter(CravlerFayeAppExtension::CONFIG_KEY);
+        /** @var array{
+         *      'app': array{
+         *          'scheme'?: string,
+         *          'host': string,
+         *          'port'?: int,
+         *          'mount': string,
+         *      },
+         *      'health_check': array{
+         *          'path': string,
+         *          'response_code': int,
+         *      },
+         * } $config
+         */
+        $config = $this->getParameter(CravlerFayeAppExtension::CONFIG_KEY);
 
         $appCfg = $config['app'];
         $healthCheckCfg = $config['health_check'];
 
-        $scheme = $appCfg['scheme'] ?: $request->getScheme();
+        $scheme = $appCfg['scheme'] ?? $request->getScheme();
         $url = $scheme.'://'.$appCfg['host'];
-        $port = 'https' == $scheme ? 443 : 80;
-        if ($appCfg['port']) {
+        $port = 'https' === $scheme ? 443 : 80;
+        if ($appCfg['port'] ?? null) {
             $url = $url.':'.$appCfg['port'];
             $port = $appCfg['port'];
         }
@@ -181,44 +209,48 @@ class AppController extends AbstractController
             $fp = \fsockopen($appCfg['host'], $port, $errCode, $errStr, 1);
             if ($fp) {
                 \stream_context_set_default([
-                    'ssl' => array(
+                    'ssl' => [
                         'verify_peer' => false,
                         'verify_peer_name' => false,
-                    ),
+                    ],
                 ]);
 
                 $headers = \get_headers($url);
-                $code = \intval(\substr($headers[0], 9, 3));
+                $code = $headers ? \intval(\substr($headers[0], 9, 3)) : 0;
                 $responseCode = \intval($healthCheckCfg['response_code'] ?: Response::HTTP_BAD_REQUEST);
 
                 if ($responseCode === $code) {
                     $status = Response::HTTP_OK;
                     $content = Response::$statusTexts[Response::HTTP_OK];
                 }
+
+                \fclose($fp);
             }
-            \fclose($fp);
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+        }
 
         return new Response($content, $status);
     }
 
-    public function exampleAction(Request $request, ?string $type = null): array
+    #[Route('/example/{type}', methods: [Request::METHOD_GET], name: 'faye_app_example', defaults: ['type' => null])]
+    public function exampleAction(Request $request, ?string $type = null): Response
     {
-        $config = $this->container->getParameter(CravlerFayeAppExtension::CONFIG_KEY);
+        /** @var array{
+         *      'example': bool,
+         * } $config
+         */
+        $config = $this->getParameter(CravlerFayeAppExtension::CONFIG_KEY);
 
         if (!$config['example']) {
             throw $this->createNotFoundException();
         }
-
-        /** @var SecurityManager $sm */
-        $sm = $this->container->get('cravler_faye_app.service.security_manager');
 
         return $this->render(
             '@CravlerFayeApp/App/example.html.twig',
             [
                 'system' => 'system' === $type,
                 'security' => [
-                    'system' => $sm->createSystemToken(),
+                    'system' => $this->securityManager->createSystemToken(),
                 ],
             ]
         );

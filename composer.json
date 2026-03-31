@@ -14,24 +14,48 @@
     "authors": [
         {
             "name": "Sergei Vizel",
-            "email": "sergei.vizel@gmail.com",
             "homepage": "http://github.com/cravler"
         }
     ],
+    "config": {
+        "allow-plugins": {
+            "phpstan/extension-installer": true
+        }
+    },
     "require": {
-        "php": ">=7.4",
-        "symfony/framework-bundle": "^5.4|^6.0",
+        "php": ">=8.1",
+        "symfony/framework-bundle": "^6.4|^7.0",
+        "symfony/http-client": "^6.4|^7.0",
+        "symfony/security-bundle": "^6.4|^7.0",
         "twig/twig": "^2.13|^3.0"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^1.10",
+        "phpstan/phpstan-symfony": "^1.3",
+        "phpstan/extension-installer": "^1.3",
+        "symfony/framework-bundle": "^6.4",
+        "symfony/http-client": "^6.4",
+        "symfony/security-bundle": "^6.4"
     },
     "autoload": {
         "psr-4": { "Cravler\\FayeAppBundle\\": "" }
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "3.x-dev"
-        },
-        "modera-module": {
-            "register-bundle": "Cravler\\FayeAppBundle\\CravlerFayeAppBundle"
+            "dev-master": "4.x-dev"
         }
+    },
+    "scripts": {
+        "cs": [
+            "[ -d ./tools/php-cs-fixer ] || (mkdir -p ./tools/php-cs-fixer && composer require --no-interaction --working-dir=./tools/php-cs-fixer friendsofphp/php-cs-fixer)",
+            "./tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --dry-run --diff -v --stop-on-violation --using-cache=no --rules=@Symfony,-single_line_throw ./"
+        ],
+        "stan": [
+            "./vendor/bin/phpstan analyse -c ./phpstan.neon ./"
+        ],
+        "pre-commit": [
+            "@cs",
+            "@stan"
+        ]
     }
 }

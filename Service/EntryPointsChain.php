@@ -5,40 +5,33 @@ namespace Cravler\FayeAppBundle\Service;
 use Cravler\FayeAppBundle\EntryPoint\EntryPointInterface;
 
 /**
- * @author Sergei Vizel <sergei.vizel@gmail.com>
+ * @author Sergei Vizel
+ *
+ * @see https://github.com/cravler
  */
 class EntryPointsChain
 {
     /**
-     * @var array
+     * @var array<string, EntryPointInterface>
      */
-    private $entryPoints = array();
+    private array $entryPoints = [];
 
-    /**
-     * @param $entryPoint
-     */
-    public function addEntryPoint($entryPoint)
+    public function addEntryPoint(mixed $entryPoint): void
     {
         if ($entryPoint instanceof EntryPointInterface) {
             $this->entryPoints[$entryPoint->getId()] = $entryPoint;
         }
     }
 
-    /**
-     * @return null|EntryPointInterface
-     */
-    public function getEntryPoint($id)
+    public function getEntryPoint(string $id): ?EntryPointInterface
     {
-        if (isset($this->entryPoints[$id])) {
-            return $this->entryPoints[$id];
-        }
-        return null;
+        return $this->entryPoints[$id] ?? null;
     }
 
     /**
-     * @return array
+     * @return array<string, EntryPointInterface>
      */
-    public function getEntryPoints()
+    public function getEntryPoints(): array
     {
         return $this->entryPoints;
     }

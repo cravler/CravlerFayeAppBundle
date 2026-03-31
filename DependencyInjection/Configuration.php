@@ -6,16 +6,13 @@ use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 /**
- * This is the class that validates and merges configuration from your app/config files
+ * This is the class that validates and merges configuration from your app/config files.
  *
  * To learn more see {@link http://symfony.com/doc/current/cookbook/bundles/extension.html#cookbook-bundles-extension-config-class}
  */
 class Configuration implements ConfigurationInterface
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('cravler_faye_app');
         $rootNode = $treeBuilder->getRootNode();
@@ -26,7 +23,7 @@ class Configuration implements ConfigurationInterface
                     ->defaultValue(false)
                 ->end()
                 ->scalarNode('user_provider')
-                    ->defaultValue(false) //security.user.provider.concrete.[provider_name]
+                    ->defaultValue(false) // security.user.provider.concrete.[provider_name]
                 ->end()
                 ->scalarNode('route_url_prefix')
                     ->defaultValue('/faye-app')
@@ -59,17 +56,6 @@ class Configuration implements ConfigurationInterface
                         ->end()
                         ->arrayNode('options')
                             ->prototype('variable')->end()
-                        ->end()
-                    ->end()
-                ->end()
-                ->arrayNode('client_adapter')
-                    ->addDefaultsIfNotSet()
-                    ->children()
-                        ->scalarNode('connect_timeout')
-                            ->defaultValue(2)
-                        ->end()
-                        ->booleanNode('insecure')
-                            ->defaultValue(false)
                         ->end()
                     ->end()
                 ->end()

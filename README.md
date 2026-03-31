@@ -7,7 +7,7 @@ This bundle depends on [faye-app](http://github.com/cravler/faye-app).
 ### Step 1: Download the Bundle
 
 ``` bash
-composer require cravler/faye-app-bundle:3.x-dev
+composer require cravler/faye-app-bundle:4.x-dev
 ```
 
 This command requires you to have Composer installed globally, as explained
@@ -35,7 +35,7 @@ return [
 # config/routes.yaml
 
 cravler_faye_app:
-    resource: "@CravlerFayeAppBundle/Resources/config/routing.yaml"
+    resource: "@CravlerFayeAppBundle/Resources/config/routing.php"
 ```
 
 ### Step 4: Include Javascript
@@ -63,7 +63,7 @@ use Cravler\FayeAppBundle\EntryPoint\AbstractEntryPoint;
 
 class Example extends AbstractEntryPoint
 {
-    public function getId()
+    public function getId(): string
     {
         return 'acme-demo.example';
     }
@@ -77,14 +77,11 @@ class Example extends AbstractEntryPoint
 
 <services>
     ...
-    <service id="acme.demo.entry_point.example" class="Acme\DemoBundle\EntryPoint\Example">
-
-        <call method="setEntryPointManager">
-            <argument type="service" id="cravler_faye_app.service.entry_point_manager" />
-        </call>
-
-        <tag name="cravler_faye_app.entry_point" />
-    </service>
+    <service id="Acme\DemoBundle\EntryPoint\Example"
+        autoconfigure="true"
+        autowire="true"
+        public="false"
+    />
     ...
 </services>
 ```

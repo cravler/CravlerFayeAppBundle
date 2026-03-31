@@ -3,28 +3,19 @@
 namespace Cravler\FayeAppBundle\Package;
 
 /**
- * @author Sergei Vizel <sergei.vizel@gmail.com>
+ * @author Sergei Vizel
+ *
+ * @see https://github.com/cravler
  */
 class Package
 {
-    /**
-     * @var mixed
-     */
-    private $body;
-
-    /**
-     * @param mixed $body
-     */
-    public function __construct($body)
-    {
-        $this->body = $body;
+    public function __construct(
+        private readonly mixed $body,
+    ) {
     }
 
-    /**
-     * @return string
-     */
-    public function __toString()
+    public function __toString(): string
     {
-        return json_encode($this->body);
+        return \json_encode($this->body) ?: '{}';
     }
 }

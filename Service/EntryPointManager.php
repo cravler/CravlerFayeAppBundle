@@ -2,134 +2,78 @@
 
 namespace Cravler\FayeAppBundle\Service;
 
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Cravler\FayeAppBundle\EntryPoint\EntryPointInterface;
 use Cravler\FayeAppBundle\Ext\SystemExtInterface;
 use Cravler\FayeAppBundle\Package\Package;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
- * @author Sergei Vizel <sergei.vizel@gmail.com>
+ * @author Sergei Vizel
+ *
+ * @see https://github.com/cravler
  */
 class EntryPointManager
 {
-    /**
-     * @var UrlGeneratorInterface
-     */
-    private $router;
-
-    /**
-     * @var PackageManager
-     */
-    private $pm;
-
-    /**
-     * @var SecurityManager
-     */
-    private $sm;
-
-    /**
-     * @var ExtensionsChain
-     */
-    private $extChain;
-
-    /**
-     * @var string
-     */
-    private $entryPointPrefix;
-
-    /**
-     * @var string
-     */
-    private $securityUrlSalt;
-
-    /**
-     * @param UrlGeneratorInterface $router
-     * @param PackageManager $pm
-     * @param SecurityManager $sm
-     * @param ExtensionsChain $extChain
-     * @param string $entryPointPrefix
-     * @param string $securityUrlSalt
-     */
     public function __construct(
-        UrlGeneratorInterface $router,
-        PackageManager $pm,
-        SecurityManager $sm,
-        ExtensionsChain $extChain,
-        $entryPointPrefix = '',
-        $securityUrlSalt = ''
-    )
-    {
-        $this->pm = $pm;
-        $this->sm = $sm;
-        $this->router = $router;
-        $this->extChain = $extChain;
-        $this->entryPointPrefix = $entryPointPrefix;
-        $this->securityUrlSalt = $securityUrlSalt;
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly PackageManager $pm,
+        private readonly SecurityManager $sm,
+        private readonly ExtensionsChain $extChain,
+        private readonly string $entryPointPrefix = '',
+        private readonly string $securityUrlSalt = '',
+    ) {
     }
 
-    /**
-     * @return PackageManager
-     */
-    public function getPackageManager()
+    public function getPackageManager(): PackageManager
     {
         return $this->pm;
     }
 
-    /**
-     * @return SecurityManager
-     */
-    public function getSecurityManager()
+    public function getSecurityManager(): SecurityManager
     {
         return $this->sm;
     }
 
-    /**
-     * @param EntryPointInterface $entryPoint
-     * @param string $channel
-     * @param mixed $data
-     * @return Package
-     */
-    public function createPackage(EntryPointInterface $entryPoint, $channel, $data = null)
+    public function createPackage(EntryPointInterface $entryPoint, string $channel, mixed $data = null): Package
     {
-        return new Package(array(
+        return new Package([
             'channel' => $this->prepareChannel($entryPoint, $channel),
             'data' => $data,
             'ext' => $this->getExt(),
-        ));
+        ]);
+    }
+
+    private function prepareChannel(EntryPointInterface $entryPoint, string $channel): string
+    {
+        return '/'.\str_replace(
+            '.',
+            '~',
+            $this->entryPointPrefix.'@'.$entryPoint->getId(),
+        ).$channel;
     }
 
     /**
-     * @param EntryPointInterface $entryPoint
-     * @param string $channel
-     * @return string
+     * @return array<string, mixed>
      */
-    private function prepareChannel(EntryPointInterface $entryPoint, $channel)
+    private function getExt(): array
     {
-        return '/' . str_replace('.', '~', $this->entryPointPrefix . '@' . $entryPoint->getId()) . $channel;
-    }
-
-    /**
-     * @return array
-     */
-    private function getExt()
-    {
-        $ext = array();
+        $ext = [];
         foreach ($this->extChain->getExtensions() as $extension) {
             if ($extension instanceof SystemExtInterface) {
-                $ext = array_replace_recursive($ext, $extension->getSystemExt());
+                $ext = \array_replace_recursive($ext, $extension->getSystemExt());
             }
         }
 
-        $security = array(
+        $security = [
             'system' => $this->getSecurityManager()->createSystemToken(),
-            'url' => $this->router->generate('faye_app_security', [], 0),
-        );
+            'url' => $this->urlGenerator->generate('faye_app_security', [], UrlGeneratorInterface::ABSOLUTE_URL),
+        ];
 
-        $security['url.hash'] = md5($security['system'] . ';' . $security['url'] . ';' . $this->securityUrlSalt);
+        $security['url.hash'] = \md5($security['system'].';'.$security['url'].';'.$this->securityUrlSalt);
 
-        $ext = array_replace_recursive($ext, array(
+        $ext = \array_replace_recursive($ext, [
             'security' => $security,
-        ));
+        ]);
 
         return $ext;
     }

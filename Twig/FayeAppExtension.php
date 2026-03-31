@@ -2,108 +2,100 @@
 
 namespace Cravler\FayeAppBundle\Twig;
 
-use Twig\TwigFunction;
-use Twig\Extension\AbstractExtension;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Cravler\FayeAppBundle\DependencyInjection\CravlerFayeAppExtension;
+use Twig\Environment as TwigEnvironment;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFunction;
 
 /**
- * @author Sergei Vizel <sergei.vizel@gmail.com>
+ * @author Sergei Vizel
+ *
+ * @see https://github.com/cravler
  */
 class FayeAppExtension extends AbstractExtension
 {
     /**
-     * @var ContainerInterface
+     * @param array{
+     *      'app': array{
+     *          'scheme'?: string,
+     *          'host': string,
+     *          'port'?: int,
+     *          'mount': string,
+     *      },
+     *      'use_request_uri'?: bool,
+     *  } $config
      */
-    private $container = null;
+    public function __construct(
+        private readonly RequestStack $requestStack,
+        private readonly TwigEnvironment $twig,
+        private readonly array $config,
+    ) {
+    }
 
-    /**
-     * @param ContainerInterface $container
-     */
-    public function __construct(ContainerInterface $container)
+    public function getFunctions(): array
     {
-        $this->container = $container;
+        return [
+            new TwigFunction('faye_app_javascript', [$this, 'getJavascript'], ['is_safe' => ['html']]),
+            new TwigFunction('faye_app_uri', [$this, 'getUri']),
+        ];
+    }
+
+    public function getJavascript(): string
+    {
+        return $this->twig->render('@CravlerFayeApp/App/javascript.html.twig');
+    }
+
+    public function getUri(): string
+    {
+        $request = $this->requestStack->getCurrentRequest();
+        if (!$request) {
+            return '';
+        }
+
+        return self::generateUri($request, $this->config);
     }
 
     /**
-     * @return array
+     * @param array{
+     *     'app': array{
+     *         'scheme'?: string,
+     *         'host': string,
+     *         'port'?: int,
+     *         'mount': string,
+     *     },
+     *     'use_request_uri'?: bool,
+     * } $config
      */
-    public function getFunctions()
+    public static function generateUri(Request $request, array $config): string
     {
-        return array(
-            new TwigFunction('faye_app_javascript', array($this, 'getJavascript'), array('is_safe' => array('html'))),
-            new TwigFunction('faye_app_uri', array($this, 'getUri')),
-        );
-    }
-
-    /**
-     * @return string
-     */
-    public function getJavascript()
-    {
-        return $this->container->get('twig')->render('@CravlerFayeApp/App/javascript.html.twig');
-    }
-
-    /**
-     * @return string
-     */
-    public function getUri()
-    {
-        $config = $this->container->getParameter(CravlerFayeAppExtension::CONFIG_KEY);
-
-        return self::generateUri($this->getRequest(), $config);
-    }
-
-    /**
-     * @param Request $request
-     * @param array $config
-     * @return string
-     */
-    static function generateUri(Request $request, array $config)
-    {
-        if ($config['use_request_uri']) {
-            $url = $request->getScheme() . '://' . $request->getHost();
+        if ($config['use_request_uri'] ?? false) {
+            $url = $request->getScheme().'://'.$request->getHost();
         } else {
-            $scheme = $config['app']['scheme'] ?: $request->getScheme();
+            $scheme = $config['app']['scheme'] ?? $request->getScheme();
 
-            $url = $scheme . '://' . $config['app']['host'];
+            $url = $scheme.'://'.$config['app']['host'];
 
-            if ($config['app']['port']) {
+            if ($config['app']['port'] ?? null) {
                 $port = $config['app']['port'];
 
-                if (80 == $port && 'http' == $scheme) {
+                if (80 === $port && 'http' === $scheme) {
                     $port = null;
-                } else if (443 == $port && 'https' == $scheme) {
+                } elseif (443 === $port && 'https' === $scheme) {
                     $port = null;
                 }
 
                 if ($port) {
-                    $url = $url . ':' . $port;
+                    $url = $url.':'.$port;
                 }
             }
         }
 
-        return $url . $config['app']['mount'];
+        return $url.$config['app']['mount'];
     }
 
-    /**
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return 'cravler_faye_app_twig_extension';
-    }
-
-    /**
-     * @return Request|null
-     */
-    private function getRequest()
-    {
-        /* @var RequestStack $requestStack */
-        $requestStack = $this->container->get('request_stack');
-
-        return $requestStack->getCurrentRequest();
     }
 }

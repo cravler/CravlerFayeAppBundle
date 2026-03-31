@@ -3,12 +3,14 @@
 namespace Cravler\FayeAppBundle\Client;
 
 /**
- * @author Sergei Vizel <sergei.vizel@gmail.com>
+ * @author Sergei Vizel
+ *
+ * @see https://github.com/cravler
  */
 interface ClientInterface
 {
     /**
-     * @param array $packages
+     * @param string[] $packages
      */
-    public function send(array $packages);
+    public function send(array $packages): void;
 }

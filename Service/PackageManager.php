@@ -6,45 +6,33 @@ use Cravler\FayeAppBundle\Client\ClientInterface;
 use Cravler\FayeAppBundle\Package\Package;
 
 /**
- * @author Sergei Vizel <sergei.vizel@gmail.com>
+ * @author Sergei Vizel
+ *
+ * @see https://github.com/cravler
  */
 class PackageManager
 {
     /**
-     * @var ClientInterface
+     * @var array<int, Package>
      */
-    private $client;
+    private array $packages = [];
 
-    /**
-     * @var array
-     */
-    protected $packages = array();
-
-    /**
-     * @param ClientInterface $client
-     */
-    public function __construct(ClientInterface $client)
-    {
-        $this->client = $client;
+    public function __construct(
+        private readonly ClientInterface $client,
+    ) {
     }
 
-    /**
-     * @param Package $package
-     */
-    public function persist(Package $package)
+    public function persist(Package $package): void
     {
         $this->packages[] = $package;
     }
 
-    /**
-     * @param Package|null $package
-     */
-    public function flush(Package $package = null)
+    public function flush(?Package $package = null): void
     {
-        $packages = array();
+        $packages = [];
 
         if ($package) {
-            $key = array_search($package, $this->packages);
+            $key = \array_search($package, $this->packages);
             if (false !== $key) {
                 unset($this->packages[$key]);
                 $packages[] = (string) $package;
@@ -53,15 +41,15 @@ class PackageManager
             foreach ($this->packages as $package) {
                 $packages[] = (string) $package;
             }
-            $this->packages = array();
+            $this->packages = [];
         }
 
-        if (count($packages)) {
+        if (\count($packages)) {
             $this->client->send($packages);
         }
     }
 
-    public function onTerminate()
+    public function onTerminate(): void
     {
         $this->flush();
     }

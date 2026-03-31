@@ -3,48 +3,33 @@
 namespace Cravler\FayeAppBundle\EntryPoint;
 
 use Cravler\FayeAppBundle\Package\Package;
-use Cravler\FayeAppBundle\Service\EntryPointManager;
 
 /**
- * @author Sergei Vizel <sergei.vizel@gmail.com>
+ * @author Sergei Vizel
+ *
+ * @see https://github.com/cravler
  */
 interface EntryPointInterface
 {
-    const TYPE_PUBLISH   = 'publish';
-    const TYPE_SUBSCRIBE = 'subscribe';
+    public const TYPE_PUBLISH = 'publish';
+    public const TYPE_SUBSCRIBE = 'subscribe';
 
     /**
      * Technical name of entry-point.
-     *
-     * @return string
      */
-    public function getId();
+    public function getId(): string;
+
+    public function publish(string $channel, mixed $data = null): Package;
+
+    public function flush(Package $package): void;
 
     /**
-     * @param string $channel
-     * @param mixed $data
-     * @return Package
+     * @param array<string, mixed> $message
      */
-    public function publish($channel, $data = null);
+    public function isGranted(string $type, string $channel, array $message): bool;
 
     /**
-     * @param Package $package
+     * @param array<string, mixed> $message
      */
-    public function flush(Package $package);
-
-    /**
-     * @param string $type
-     * @param string $channel
-     * @param array $message
-     * @return bool
-     */
-    public function isGranted($type, $channel, array $message);
-
-    /**
-     * @param string $type
-     * @param string $channel
-     * @param array $message
-     * @return bool|int
-     */
-    public function useCache($type, $channel, array $message);
+    public function useCache(string $type, string $channel, array $message): bool|int;
 }

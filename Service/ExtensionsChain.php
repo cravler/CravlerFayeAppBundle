@@ -5,19 +5,18 @@ namespace Cravler\FayeAppBundle\Service;
 use Cravler\FayeAppBundle\Ext\ContributorInterface;
 
 /**
- * @author Sergei Vizel <sergei.vizel@gmail.com>
+ * @author Sergei Vizel
+ *
+ * @see https://github.com/cravler
  */
 class ExtensionsChain
 {
     /**
-     * @var array
+     * @var array<int, ContributorInterface>
      */
-    private $extensions = array();
+    private $extensions = [];
 
-    /**
-     * @param $extension
-     */
-    public function addExtension($extension)
+    public function addExtension(mixed $extension): void
     {
         if ($extension instanceof ContributorInterface) {
             $this->extensions[] = $extension;
@@ -25,9 +24,9 @@ class ExtensionsChain
     }
 
     /**
-     * @return array
+     * @return array<int, ContributorInterface>
      */
-    public function getExtensions()
+    public function getExtensions(): array
     {
         return $this->extensions;
     }

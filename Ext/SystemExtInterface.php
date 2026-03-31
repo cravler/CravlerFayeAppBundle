@@ -3,12 +3,14 @@
 namespace Cravler\FayeAppBundle\Ext;
 
 /**
- * @author Sergei Vizel <sergei.vizel@gmail.com>
+ * @author Sergei Vizel
+ *
+ * @see https://github.com/cravler
  */
 interface SystemExtInterface extends ContributorInterface
 {
     /**
-     * @return array
+     * @return array<string, mixed>
      */
-    public function getSystemExt();
+    public function getSystemExt(): array;
 }

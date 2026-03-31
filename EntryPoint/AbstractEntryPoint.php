@@ -4,37 +4,29 @@ namespace Cravler\FayeAppBundle\EntryPoint;
 
 use Cravler\FayeAppBundle\Package\Package;
 use Cravler\FayeAppBundle\Service\EntryPointManager;
+use Symfony\Contracts\Service\Attribute\Required;
 
 /**
- * @author Sergei Vizel <sergei.vizel@gmail.com>
+ * @author Sergei Vizel
+ *
+ * @see https://github.com/cravler
  */
 abstract class AbstractEntryPoint implements EntryPointInterface
 {
-    /**
-     * @var EntryPointManager
-     */
-    private $epm;
+    private EntryPointManager $epm;
 
-    /**
-     * @param EntryPointManager $epm
-     */
-    public function setEntryPointManager(EntryPointManager $epm)
+    #[Required]
+    public function setEntryPointManager(EntryPointManager $epm): void
     {
         $this->epm = $epm;
     }
 
-    /**
-     * @return EntryPointManager
-     */
-    public function getEntryPointManager()
+    public function getEntryPointManager(): EntryPointManager
     {
         return $this->epm;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function publish($channel, $data = null)
+    public function publish(string $channel, mixed $data = null): Package
     {
         $package = $this->epm->createPackage($this, $channel, $data);
 
@@ -43,30 +35,17 @@ abstract class AbstractEntryPoint implements EntryPointInterface
         return $package;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function flush(Package $package)
+    public function flush(Package $package): void
     {
         $this->epm->getPackageManager()->flush($package);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isGranted($type, $channel, array $message)
+    public function isGranted(string $type, string $channel, array $message): bool
     {
-        if (self::TYPE_SUBSCRIBE == $type) {
-            return true;
-        } else {
-            return false;
-        }
+        return self::TYPE_SUBSCRIBE === $type;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function useCache($type, $channel, array $message)
+    public function useCache(string $type, string $channel, array $message): bool|int
     {
         return false;
     }
