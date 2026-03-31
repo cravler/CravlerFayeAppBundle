@@ -9,5 +9,5 @@ namespace Cravler\FayeAppBundle\Client\Adapter;
  */
 interface AdapterInterface
 {
-    public function postJSON(string $url, string $data): void;
+    public function postJSON(string $url, string $package): void;
 }

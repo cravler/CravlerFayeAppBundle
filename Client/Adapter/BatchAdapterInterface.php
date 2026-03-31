@@ -10,7 +10,7 @@ namespace Cravler\FayeAppBundle\Client\Adapter;
 interface BatchAdapterInterface extends AdapterInterface
 {
     /**
-     * @param string|string[] $data
+     * @param string[] $packages
      */
-    public function postJSON(string $url, string|array $data): void;
+    public function postBatch(string $url, array $packages): void;
 }

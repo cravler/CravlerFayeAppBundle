@@ -16,17 +16,18 @@ class HttpClientAdapter implements BatchAdapterInterface
     ) {
     }
 
-    public function postJSON(string $url, string|array $data): void
+    public function postJSON(string $url, string $package): void
     {
-        if (!\is_array($data)) {
-            $data = [$data];
-        }
+        $this->postBatch($url, [$package]);
+    }
 
+    public function postBatch(string $url, array $packages): void
+    {
         $responses = [];
-        foreach ($data as $body) {
+        foreach ($packages as $package) {
             $responses[] = $this->client->request('POST', $url, [
                 'headers' => ['Content-Type' => 'application/json'],
-                'body' => $body,
+                'body' => $package,
             ]);
         }
 

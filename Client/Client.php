@@ -58,7 +58,7 @@ class Client implements ClientInterface
     public function send(array $packages): void
     {
         if ($this->adapter instanceof Adapter\BatchAdapterInterface) {
-            $this->adapter->postJSON($this->fayeServerUrl, $packages);
+            $this->adapter->postBatch($this->fayeServerUrl, $packages);
         } else {
             foreach ($packages as $package) {
                 $this->adapter->postJSON($this->fayeServerUrl, $package);
