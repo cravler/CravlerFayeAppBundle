@@ -7,7 +7,7 @@ This bundle depends on [faye-app](http://github.com/cravler/faye-app).
 ### Step 1: Download the Bundle
 
 ``` bash
-composer require cravler/faye-app-bundle:2.x-dev
+composer require cravler/faye-app-bundle:3.x-dev
 ```
 
 This command requires you to have Composer installed globally, as explained
